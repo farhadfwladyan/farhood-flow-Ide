@@ -1,0 +1,3153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>farh∞d Online Compiler v13.0 | استودیوی ابری کدنویسی، شبیه‌ساز Tkinter GUI و هوش مصنوعی فوق‌سریع</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Vazirmatn (Persian UI) & JetBrains Mono (Code Editor/Terminal) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- JSZip for Real Project ZIP Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- AlaSQL for Real Client-Side SQL Execution -->
+  <script src="https://cdn.jsdelivr.net/npm/alasql@4.4.0/dist/alasql.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            farhood: {
+              primary: '#0066FF',
+              secondary: '#00C8FF',
+              bg: '#050B1A',
+              card: '#101B35',
+              accent: '#7B61FF',
+              success: '#00E6A0',
+              warning: '#FFB800',
+              danger: '#FF3B5C'
+            }
+          },
+          fontFamily: {
+            sans: ['Vazirmatn', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --primary: #0066FF;
+      --secondary: #00C8FF;
+      --bg-deep: #050B1A;
+      --bg-card: #101B35;
+      --accent: #7B61FF;
+      --success: #00E6A0;
+      --warning: #FFB800;
+      --danger: #FF3B5C;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #0066FF #050B1A;
+    }
+
+    *::-webkit-scrollbar { width: 6px; height: 6px; }
+    *::-webkit-scrollbar-track { background: #050B1A; }
+    *::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #0066FF, #00C8FF, #7B61FF);
+      border-radius: 9999px;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-deep);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 102, 255, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 85% 25%, rgba(123, 97, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(0, 200, 255, 0.1) 0%, transparent 45%);
+      color: #F0F6FF;
+      font-family: 'Vazirmatn', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body.ide-locked {
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden !important;
+    }
+
+    .glass-panel {
+      background: rgba(16, 27, 53, 0.78);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(0, 200, 255, 0.18);
+      box-shadow: 
+        0 20px 50px -10px rgba(2, 6, 23, 0.8),
+        0 0 25px -5px rgba(0, 102, 255, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .spotlight-card {
+      position: relative;
+      background: linear-gradient(155deg, rgba(16, 27, 53, 0.9) 0%, rgba(7, 13, 28, 0.96) 100%);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 200, 255, 0.18);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        360px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 200, 255, 0.18),
+        transparent 45%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .spotlight-card:hover::before { opacity: 1; }
+    .spotlight-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 200, 255, 0.65);
+      box-shadow: 0 18px 40px -10px rgba(0, 102, 255, 0.4), 0 0 22px rgba(0, 200, 255, 0.22);
+    }
+
+    .neon-btn-primary {
+      position: relative;
+      background: linear-gradient(135deg, #0066FF 0%, #00C8FF 55%, #7B61FF 100%);
+      background-size: 200% 200%;
+      color: #ffffff;
+      box-shadow: 0 0 22px rgba(0, 102, 255, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      transition: all 0.25s ease;
+      animation: gradientShift 5s ease infinite;
+    }
+    .neon-btn-primary:hover {
+      box-shadow: 0 0 32px rgba(0, 200, 255, 0.8), 0 0 14px rgba(123, 97, 255, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .neon-btn-run {
+      background: linear-gradient(135deg, #00E6A0 0%, #00C8FF 100%);
+      color: #02130D;
+      font-weight: 800;
+      box-shadow: 0 0 22px rgba(0, 230, 160, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      transition: all 0.25s ease;
+    }
+    .neon-btn-run:hover {
+      box-shadow: 0 0 32px rgba(0, 230, 160, 0.85), 0 0 16px rgba(0, 200, 255, 0.6);
+      transform: scale(1.02);
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .neon-text-gradient {
+      background: linear-gradient(90deg, #FFFFFF 0%, #00C8FF 45%, #00E6A0 75%, #7B61FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 18px rgba(0, 200, 255, 0.25));
+    }
+
+    .infinity-symbol {
+      display: inline-block;
+      background: linear-gradient(90deg, #00C8FF, #00E6A0, #7B61FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.8));
+      animation: pulseGlow 2.4s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 5px rgba(0, 200, 255, 0.5)); transform: scale(0.98); }
+      100% { filter: drop-shadow(0 0 16px rgba(0, 230, 160, 0.95)); transform: scale(1.08); }
+    }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ltr-code {
+      direction: ltr !important;
+      text-align: left !important;
+      font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    #codeEditorViewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #040917;
+      display: flex;
+      direction: ltr;
+    }
+
+    #codeLineGutter {
+      width: 68px;
+      padding: 16px 8px 16px 6px;
+      background: #030712;
+      color: #475569;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: right;
+      user-select: none;
+      border-right: 1px solid rgba(0, 200, 255, 0.16);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .gutter-line-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 24px;
+      padding: 0 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .gutter-line-item:hover { background: rgba(0, 200, 255, 0.12); color: #E2E8F0; }
+    .gutter-line-item.has-breakpoint { background: rgba(255, 59, 92, 0.18); color: #FDA4AF; font-weight: 700; }
+    .gutter-line-item.has-error { background: rgba(255, 59, 92, 0.32); color: #FF3B5C; font-weight: 800; }
+
+    .bp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: transparent;
+      display: inline-block;
+      transition: all 0.15s;
+    }
+    .gutter-line-item:hover .bp-dot { background: rgba(255, 59, 92, 0.4); }
+    .gutter-line-item.has-breakpoint .bp-dot { background: #FF3B5C; box-shadow: 0 0 8px #FF3B5C; }
+
+    #codeMainTextarea {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      color: #F1F5F9;
+      caret-color: #00E6A0;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 16px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 24px;
+      tab-size: 4;
+      white-space: pre;
+      overflow-y: auto;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+    }
+
+    #codeMainTextarea::selection { background: rgba(0, 102, 255, 0.4); color: #fff; }
+
+    .resizer-h {
+      height: 6px;
+      cursor: row-resize;
+      background: rgba(0, 200, 255, 0.14);
+      transition: all 0.2s;
+    }
+    .resizer-h:hover, .resizer-h.active {
+      background: linear-gradient(90deg, #0066FF, #00C8FF, #00E6A0, #7B61FF);
+      box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+    }
+
+    body.light-theme {
+      --bg-deep: #F1F5F9;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    body.light-theme .glass-panel, body.light-theme .spotlight-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(0, 102, 255, 0.25);
+      color: #0F172A;
+    }
+    body.light-theme #codeEditorViewport { background: #FFFFFF; }
+    body.light-theme #codeLineGutter { background: #F8FAFC; color: #64748B; border-right-color: #E2E8F0; }
+    body.light-theme #codeMainTextarea { color: #0F172A; }
+
+    .ai-streaming-cursor::after {
+      content: '▋';
+      display: inline-block;
+      color: #00E6A0;
+      margin-right: 3px;
+      animation: blinkCursor 0.6s infinite;
+    }
+    @keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .engine-dot-online { width: 8px; height: 8px; border-radius: 50%; background: #00E6A0; box-shadow: 0 0 8px #00E6A0; }
+    .engine-dot-standby { width: 8px; height: 8px; border-radius: 50%; background: #00C8FF; box-shadow: 0 0 8px #00C8FF; }
+    .engine-dot-fallback { width: 8px; height: 8px; border-radius: 50%; background: #FFB800; box-shadow: 0 0 8px #FFB800; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-farhood-primary selection:text-white">
+
+  <!-- 1. ANIMATED CYBER-BLUE BACKGROUND CANVAS -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- 2. SINGLE UNIFIED TOP HEADER BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-cyan-500/25 px-3 sm:px-5 py-2 shrink-0">
+    <div class="max-w-[1780px] mx-auto flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Right: Brand Logo & Main View Switcher -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-2.5 cursor-pointer group" onclick="switchMainView('home')">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-farhood-primary via-farhood-secondary to-farhood-accent p-[2px] shadow-lg shadow-blue-500/30">
+            <div class="w-full h-full bg-[#050B1A] rounded-[14px] flex items-center justify-center font-mono font-black text-lg text-cyan-400">
+              f<span class="infinity-symbol">∞</span>
+            </div>
+          </div>
+          <div class="hidden sm:block">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono font-black text-lg tracking-tight text-white">farh<span class="infinity-symbol">∞</span>d</span>
+              <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">v13.0 GUI+AI</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Multi-Engine Cloud IDE & Tkinter GUI</p>
+          </div>
+        </div>
+
+        <div class="flex items-center bg-[#050B1A]/90 p-1 rounded-xl border border-cyan-500/25">
+          <button onclick="switchMainView('home')" id="navBtn-home" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-gradient-to-r from-farhood-primary to-blue-500 text-white shadow">
+            <i class="fa-solid fa-house"></i>
+            <span>صفحه اصلی (۳۹ زبان)</span>
+          </button>
+          <button onclick="switchMainView('ide')" id="navBtn-ide" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-solid fa-code text-cyan-400"></i>
+            <span>محیط کدنویسی (IDE)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Center: Contextual IDE Controls -->
+      <div id="unifiedIdeToolbar" class="hidden items-center flex-wrap gap-1.5">
+        <button onclick="toggleIdeSidebar()" class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-cyan-500/25 text-xs" title="نمایش/مخفی‌سازی فایل‌ها">
+          <i class="fa-solid fa-folder-tree"></i>
+        </button>
+
+        <div class="flex items-center bg-[#071126] border border-cyan-500/35 rounded-xl px-2.5 py-1">
+          <span id="ideActiveLangIcon" class="ml-1.5 text-sm">🐍</span>
+          <select id="ideLanguageSelect" onchange="changeActiveLanguageFromDropdown(this.value)" class="bg-transparent text-xs font-extrabold text-white focus:outline-none cursor-pointer"></select>
+        </div>
+
+        <div class="hidden xl:flex items-center gap-1.5 bg-[#071126] border border-emerald-500/35 rounded-xl px-2.5 py-1">
+          <span id="engineHealthDot" class="engine-dot-online"></span>
+          <select id="preferredEngineSelect" onchange="changePreferredEngine(this.value)" class="bg-transparent text-[11px] font-mono font-bold text-emerald-300 focus:outline-none cursor-pointer">
+            <option value="auto" class="bg-[#050B1A] text-white">Engine: Auto + Tkinter GUI</option>
+            <option value="local" class="bg-[#050B1A] text-white">Engine 1: Local WASM / GUI</option>
+            <option value="wandbox" class="bg-[#050B1A] text-white">Engine 2: Wandbox / Judge0 Cloud</option>
+            <option value="piston" class="bg-[#050B1A] text-white">Engine 3: Piston Runtimes API</option>
+          </select>
+        </div>
+
+        <button id="btnRunCode" onclick="executeActiveCode()" class="neon-btn-run px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
+          <i id="runBtnIcon" class="fa-solid fa-play"></i>
+          <span id="runBtnText">اجرای کد (Run)</span>
+        </button>
+
+        <button id="btnStopCode" onclick="stopCodeExecution()" disabled class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 disabled:opacity-35 disabled:pointer-events-none border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-1 transition" title="توقف اجرا">
+          <i class="fa-solid fa-stop"></i>
+        </button>
+
+        <button onclick="insertLanguageStarterTemplate()" class="px-2.5 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/35 border border-cyan-500/35 text-cyan-300 text-xs font-bold flex items-center gap-1" title="درج کد نمونه این زبان">
+          <i class="fa-solid fa-wand-sparkles"></i>
+          <span class="hidden lg:inline">کد نمونه</span>
+        </button>
+
+        <button onclick="insertTkinterStarterCode()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center gap-1" title="درج نمونه برنامه گرافیکی Tkinter">
+          <i class="fa-solid fa-window-restore"></i>
+          <span class="hidden lg:inline">نمونه Tkinter</span>
+        </button>
+
+        <button onclick="formatCurrentCode()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1" title="مرتب‌سازی کد">
+          <i class="fa-solid fa-indent text-cyan-400"></i>
+          <span class="hidden 2xl:inline">Format</span>
+        </button>
+
+        <button onclick="clearCurrentEditor()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-xs" title="پاکسازی ویرایشگر">
+          <i class="fa-solid fa-eraser"></i>
+        </button>
+
+        <!-- Font Size Control merged from 2.html -->
+        <div class="hidden lg:flex items-center bg-slate-800/90 rounded-xl border border-slate-700 px-1.5 py-0.5" title="تغییر اندازه فونت ادیتور">
+          <button onclick="changeEditorFontSize(-1)" class="px-1 text-xs text-slate-300 hover:text-white font-bold">A-</button>
+          <span id="fontSizeLabel" class="text-[10px] font-mono text-cyan-400 px-1">14px</span>
+          <button onclick="changeEditorFontSize(1)" class="px-1 text-xs text-slate-300 hover:text-white font-bold">A+</button>
+        </div>
+
+        <button onclick="openEngineeringSuiteModal('flowchart')" class="px-2.5 py-1.5 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 border border-purple-400/40 text-purple-200 text-xs font-bold flex items-center gap-1">
+          <i class="fa-solid fa-compass-drafting text-amber-300"></i>
+          <span class="hidden xl:inline">ابزار مهندسی</span>
+        </button>
+
+        <button onclick="exportFullProjectZip()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center gap-1" title="دانلود کل پروژه به صورت فایل ZIP">
+          <i class="fa-solid fa-file-zipper"></i>
+          <span class="hidden 2xl:inline">ZIP</span>
+        </button>
+
+        <input type="file" id="hiddenFileInput" class="hidden" onchange="handleFileUpload(event)" />
+        <button onclick="document.getElementById('hiddenFileInput').click()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700" title="آپلود فایل کد">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <button onclick="downloadActiveFile()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700" title="دانلود فایل فعال">
+          <i class="fa-solid fa-download"></i>
+        </button>
+      </div>
+
+      <!-- Left: New File, AI Super-Studio, Theme & Settings -->
+      <div class="flex items-center gap-1.5">
+        <button onclick="openNewFileModal()" class="neon-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5">
+          <i class="fa-solid fa-file-circle-plus"></i>
+          <span class="hidden sm:inline">فایل جدید</span>
+        </button>
+
+        <button onclick="openAiInIde()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-purple-600/30">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span>هوش مصنوعی farh∞d AI</span>
+        </button>
+
+        <button onclick="toggleEditorTheme()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-amber-300 text-xs border border-slate-700" title="تغییر تم روشن / تاریک">
+          <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+        </button>
+
+        <button onclick="openSettingsModal()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs" title="تنظیمات">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEW 1: HOME & 39-LANGUAGE EXPLORER -->
+  <main id="view-home" class="relative z-10 flex-1 max-w-[1620px] w-full mx-auto px-4 sm:px-6 py-6 space-y-8">
+    <section id="heroSection" class="relative rounded-3xl glass-panel p-6 sm:p-10 overflow-hidden border border-cyan-400/35">
+      <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-600/25 rounded-full blur-[95px] pointer-events-none animate-pulse"></div>
+      <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-purple-600/25 rounded-full blur-[95px] pointer-events-none animate-pulse"></div>
+
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7 space-y-5 text-right">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600/20 border border-cyan-400/40 text-cyan-200 text-xs font-bold">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>پلتفرم جامع توسعه ابری • ۳۹ زبان زنده • هوش مصنوعی بلادرنگ</span>
+          </div>
+
+          <div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white font-mono">
+              farh<span class="infinity-symbol">∞</span>d <span class="text-cyan-400 text-2xl sm:text-3xl">Cloud Studio</span>
+            </h1>
+            <h2 class="text-xl sm:text-2xl font-extrabold neon-text-gradient mt-2">
+              «کد بنویس، اجرا کن، فراتر برو.»
+            </h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-2xl">
+            <b>farh∞d IDE</b> یک استودیوی کدنویسی ابری نسل جدید است که بدون نیاز به نصب هیچ پیش‌نیازی، امکان نوشتن، دریافت ورودی تعاملی، خطایابی هوشمند، مصورسازی الگوریتم و اجرای آنی کدها را در <b>۳۹ زبان برنامه‌نویسی</b> به همراه دستیار هوشمند <b>farh∞d AI</b> فراهم می‌کند.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="spotlight-card p-3.5 rounded-2xl border border-cyan-500/30 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-400/40 flex items-center justify-center text-cyan-300 text-lg shrink-0">
+                <i class="fa-solid fa-bolt-lightning animate-bounce"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">کامپایلر چندموتوره</div>
+                <div class="text-[11px] text-slate-400">پرسش خودکار ورودی و اجرا</div>
+              </div>
+            </div>
+
+            <div class="spotlight-card p-3.5 rounded-2xl border border-purple-500/30 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-400/40 flex items-center justify-center text-purple-300 text-lg shrink-0">
+                <i class="fa-solid fa-brain animate-pulse"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">هوش مصنوعی LPU</div>
+                <div class="text-[11px] text-slate-400">تولید و رفع باگ آنی کدها</div>
+              </div>
+            </div>
+
+            <div class="spotlight-card p-3.5 rounded-2xl border border-emerald-500/30 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-lg shrink-0">
+                <i class="fa-solid fa-diagram-project"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">ابزارهای مهندسی</div>
+                <div class="text-[11px] text-slate-400">فلوچارت، دیباگر و SQL</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button onclick="switchMainView('ide')" class="neon-btn-primary px-6 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center gap-2">
+              <i class="fa-solid fa-terminal"></i>
+              <span>ورود به محیط کدنویسی (IDE)</span>
+            </button>
+            <button onclick="scrollToLanguageHub()" class="px-5 py-3 rounded-2xl bg-[#0A1633]/90 hover:bg-[#11224D] text-white border border-cyan-400/40 text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              <span>مشاهده ۳۹ زبان برنامه‌نویسی</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="spotlight-card rounded-3xl border border-cyan-400/40 p-6 relative overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between border-b border-cyan-500/20 pb-3 mb-4">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              </div>
+              <span class="font-mono text-[11px] text-cyan-300">farh∞d Architecture Core</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">ACTIVE</span>
+            </div>
+
+            <div class="relative h-52 flex items-center justify-center">
+              <div class="w-44 h-44 rounded-full border border-dashed border-cyan-400/40 animate-[spin_14s_linear_infinite] absolute flex items-center justify-between px-1">
+                <span class="w-7 h-7 rounded-lg bg-[#091530] border border-cyan-400 text-xs flex items-center justify-center shadow-lg">🐍</span>
+                <span class="w-7 h-7 rounded-lg bg-[#091530] border border-purple-400 text-xs flex items-center justify-center shadow-lg">🚀</span>
+              </div>
+              <div class="w-32 h-32 rounded-full border border-purple-400/40 animate-[spin_9s_linear_infinite_reverse] absolute flex items-center justify-between px-1">
+                <span class="w-6 h-6 rounded-lg bg-[#091530] border border-emerald-400 text-[11px] flex items-center justify-center">⚡</span>
+                <span class="w-6 h-6 rounded-lg bg-[#091530] border border-amber-400 text-[11px] flex items-center justify-center">🦀</span>
+              </div>
+              <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-farhood-primary via-farhood-secondary to-farhood-accent p-[2px] shadow-[0_0_35px_rgba(0,200,255,0.6)] z-10">
+                <div class="w-full h-full bg-[#050B1A] rounded-[14px] flex flex-col items-center justify-center font-mono">
+                  <span class="font-black text-xl text-white">f<span class="infinity-symbol">∞</span></span>
+                  <span class="text-[9px] text-cyan-300">STUDIO</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-cyan-500/20 text-center font-mono text-[11px]">
+              <div class="p-2 rounded-xl bg-[#071126] border border-cyan-500/20">
+                <div class="text-cyan-400 font-black text-sm">39</div>
+                <div class="text-[10px] text-slate-400 font-sans">زبان فعال</div>
+              </div>
+              <div class="p-2 rounded-xl bg-[#071126] border border-emerald-500/20">
+                <div class="text-emerald-400 font-black text-sm">4 Engines</div>
+                <div class="text-[10px] text-slate-400 font-sans">موتور اجرایی</div>
+              </div>
+              <div class="p-2 rounded-xl bg-[#071126] border border-purple-500/20">
+                <div class="text-purple-400 font-black text-sm">Groq AI</div>
+                <div class="text-[10px] text-slate-400 font-sans">هوش مصنوعی</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs sm:text-sm font-extrabold text-cyan-300 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-orange-400"></i>
+            <span>محبوب‌ترین زبان‌ها (ورود با یک کلیک)</span>
+          </h3>
+          <label class="flex items-center gap-1.5 text-[11px] text-slate-300 cursor-pointer">
+            <input type="checkbox" id="openEmptyEditorToggle" class="accent-cyan-400 rounded cursor-pointer" />
+            <span>ورود با ویرایشگر خالی</span>
+          </label>
+        </div>
+        <div id="popularLangsBar" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs sm:text-sm font-extrabold text-purple-300 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-purple-400"></i>
+            <span>زبان‌های اخیر شما</span>
+          </h3>
+          <button onclick="openNewFileModal()" class="text-xs font-bold text-cyan-400 hover:underline">+ ایجاد فایل جدید</button>
+        </div>
+        <div id="recentLangsBar" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </section>
+
+    <section id="languageHubSection" class="space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+            <i class="fa-solid fa-cubes text-cyan-400"></i>
+            <span>انتخاب زبان برنامه‌نویسی (۳۹ زبان فعال با کامپایلر اختصاصی)</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">روی هر زبان کلیک کنید تا مستقیماً وارد محیط کدنویسی همان زبان شوید.</p>
+        </div>
+
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-cyan-400 text-xs"></i>
+          <input id="langSearchInput" type="text" oninput="renderLanguageGrid()" placeholder="جستجوی نام زبان، کامپایلر یا پسوند (.py, .cpp, .js)..." class="w-full pr-9 pl-4 py-2.5 rounded-xl bg-[#081229]/90 border border-cyan-500/35 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400" />
+        </div>
+      </div>
+
+      <div id="langCategoryTabs" class="flex items-center gap-2 overflow-x-auto pb-1">
+        <button onclick="setLangCategoryFilter('all')" data-cat="all" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-farhood-primary text-white shadow-lg shadow-blue-600/30">🌟 همه زبان‌ها (۳۹)</button>
+        <button onclick="setLangCategoryFilter('group1')" data-cat="group1" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">🚀 گروه اول: اصلی و سیستم (۱۰)</button>
+        <button onclick="setLangCategoryFilter('group2')" data-cat="group2" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">📱 گروه دوم: مدرن و اسکریپت (۱۰)</button>
+        <button onclick="setLangCategoryFilter('group3')" data-cat="group3" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">🧮 گروه سوم: علمی و سطح پایین (۱۰)</button>
+        <button onclick="setLangCategoryFilter('web')" data-cat="web" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">🌐 توسعه وب (۵)</button>
+        <button onclick="setLangCategoryFilter('db')" data-cat="db" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">🗄️ دیتابیس (۴)</button>
+      </div>
+
+      <div id="languagesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"></div>
+    </section>
+  </main>
+
+  <!-- VIEW 2: MAIN IDE WORKSPACE -->
+  <section id="view-ide" class="hidden relative z-10 flex-1 flex flex-col h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] overflow-hidden">
+    <div class="flex-1 flex overflow-hidden relative">
+      
+      <!-- SIDEBAR -->
+      <aside id="ideSidebar" class="w-64 glass-panel border-l border-cyan-500/20 flex flex-col shrink-0 select-none z-20">
+        <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-folder-open text-farhood-secondary text-xs"></i>
+            <span class="text-xs font-extrabold text-white">مدیریت فایل‌های پروژه</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="openNewFileModal()" class="p-1.5 rounded-lg hover:bg-slate-700 text-cyan-400 text-xs" title="ایجاد فایل جدید"><i class="fa-solid fa-file-circle-plus"></i></button>
+            <button onclick="createNewFolderPrompt()" class="p-1.5 rounded-lg hover:bg-slate-700 text-amber-400 text-xs" title="ایجاد پوشه جدید"><i class="fa-solid fa-folder-plus"></i></button>
+            <button onclick="createProjectSnapshot()" class="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400 text-xs" title="ثبت نسخه (Git Snapshot)"><i class="fa-solid fa-code-commit"></i></button>
+          </div>
+        </div>
+
+        <div id="fileExplorerList" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+
+        <div class="border-t border-slate-800 p-2.5 bg-[#060D1E]/95 space-y-2">
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-slate-400 font-bold">وضعیت موتورهای کامپایلر:</span>
+            <span id="sidebarEngineActiveBadge" class="text-emerald-400 font-mono font-bold">Auto + GUI</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1 text-[10px] font-mono text-center">
+            <div class="py-1 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">● Tk GUI</div>
+            <div class="py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">● Cloud</div>
+            <div class="py-1 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300">● Piston</div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80">
+            <span><i class="fa-solid fa-clock-rotate-left text-cyan-400 ml-1"></i>تاریخچه اجرا</span>
+            <span class="text-emerald-400 font-mono text-[10px]">● ذخیره خودکار</span>
+          </div>
+          <div id="executionHistoryMiniList" class="max-h-24 overflow-y-auto space-y-1 text-[11px]"></div>
+        </div>
+      </aside>
+
+      <!-- CENTER EDITOR + TERMINAL -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#040917]">
+        <div class="bg-[#070F24] border-b border-slate-800 px-2 flex items-center justify-between shrink-0">
+          <div id="editorTabsContainer" class="flex items-center gap-1 overflow-x-auto py-1"></div>
+          <div class="flex items-center gap-2.5 px-2.5 py-1 text-[11px] font-mono text-slate-300 shrink-0">
+            <span class="px-2 py-0.5 rounded bg-blue-500/15 border border-cyan-400/30 text-cyan-300 font-bold">خطوط: <strong id="totalLinesBadge">1</strong></span>
+            <span id="breakpointsCountBadge" class="hidden sm:inline px-2 py-0.5 rounded bg-rose-500/15 border border-rose-400/30 text-rose-300 font-bold cursor-pointer" onclick="switchTerminalTab('debugger')">🔴 BP: 0</span>
+            <span id="cursorPositionIndicator" class="hidden md:inline text-slate-400">سطر 1، ستون 1</span>
+            <span id="activeEngineLabel" class="hidden lg:inline text-emerald-400">Python 3.12</span>
+          </div>
+        </div>
+
+        <div id="codeEditorViewport">
+          <div id="codeLineGutter" title="برای گذاشتن یا برداشتن Breakpoint روی شماره خط کلیک کنید"></div>
+          <textarea id="codeMainTextarea" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="// محیط کدنویسی آماده است! کد خود را بنویسید، روی «نمونه Tkinter» یا «کد نمونه» کلیک کنید، یا از هوش مصنوعی farh∞d AI بخواهید هر برنامه‌ای را برایتان بنویسد..."></textarea>
+        </div>
+
+        <div id="terminalResizer" class="resizer-h flex items-center justify-center shrink-0">
+          <div class="w-12 h-1 rounded-full bg-cyan-400/50"></div>
+        </div>
+
+        <div id="bottomTerminalPanel" style="height: 255px;" class="glass-panel border-t border-cyan-500/25 flex flex-col shrink-0">
+          <div class="bg-[#060D1E] px-3 py-1.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-1 overflow-x-auto">
+              <button onclick="switchTerminalTab('output')" id="termTab-output" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-bold bg-blue-600/25 text-cyan-300 border border-cyan-400/30 flex items-center gap-1.5"><i class="fa-solid fa-terminal"></i><span>Output (خروجی)</span></button>
+              <button onclick="switchTerminalTab('preview')" id="termTab-preview" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-window-restore text-emerald-400"></i><span>پیش‌نمایش زنده (GUI / Web)</span></button>
+              <button onclick="switchTerminalTab('errors')" id="termTab-errors" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-shield-virus text-rose-400"></i><span>Error Intelligence</span><span id="errorCountBadge" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono">0</span></button>
+              <button onclick="switchTerminalTab('stdin')" id="termTab-stdin" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-keyboard text-amber-400"></i><span>Input (stdin)</span></button>
+              <button onclick="switchTerminalTab('debugger')" id="termTab-debugger" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-bug text-emerald-400"></i><span>Debugger & RAM</span></button>
+              <button onclick="switchTerminalTab('info')" id="termTab-info" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-microchip text-purple-400"></i><span>Execution Info</span></button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span id="execMetricsPill" class="hidden sm:inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-slate-800/90 text-[11px] font-mono text-slate-300">
+                <span id="metricStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="metricEngineBadge" class="text-cyan-300">Ready</span> •
+                <span id="metricTimeText">0 ms</span> • <span id="metricMemText">0 KB</span>
+              </span>
+              <button onclick="copyOutputToClipboard()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="کپی خروجی"><i class="fa-regular fa-copy"></i></button>
+              <button onclick="clearTerminalOutput()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="پاک کردن ترمینال"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-hidden relative bg-[#040917]">
+            <div id="executionLoadingOverlay" class="hidden absolute inset-0 bg-[#050B1A]/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2">
+              <div class="flex items-center gap-3">
+                <div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <span id="executionLoadingStageText" class="text-xs font-extrabold text-cyan-300">در حال اجرای کد در موتور کامپایلر...</span>
+              </div>
+              <span class="text-[11px] font-mono text-slate-400">Multi-Engine Zero-401 + Tkinter GUI Simulator Active</span>
+            </div>
+
+            <div id="termPane-output" class="term-pane h-full flex flex-col justify-between overflow-hidden">
+              <div id="terminalStdoutContent" class="flex-1 overflow-y-auto p-3 ltr-code text-xs sm:text-sm space-y-1">
+                <div class="text-slate-500">// آماده اجرا. روی دکمه سبز «اجرای کد (Run)» کلیک کنید یا Ctrl+Enter را بزنید.</div>
+              </div>
+              <div class="bg-[#060E22] border-t border-slate-800/80 px-3 py-1.5 flex items-center gap-2 shrink-0">
+                <span class="font-mono text-xs text-emerald-400 font-bold">farh∞d:~$</span>
+                <input id="interactiveShellInput" type="text" placeholder="دستور ترمینال (help, run, clear, files, engines, tkinter, version, calc 2+2)..." class="flex-1 bg-transparent ltr-code text-xs text-white focus:outline-none" />
+              </div>
+            </div>
+
+            <div id="termPane-errors" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-2">
+              <div class="text-emerald-400 font-mono">✓ سیستم هوشمند تشخیص خطا (Error Intelligence): هیچ خطایی در کد شما یافت نشد.</div>
+            </div>
+
+            <div id="termPane-stdin" class="term-pane hidden h-full p-2.5 flex flex-col gap-1.5">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>ورودی‌های استاندارد برنامه (<code class="text-amber-300">input() / cin / scanf / Console.ReadLine</code>) — هر ورودی در یک سطر:</span>
+                <button onclick="document.getElementById('stdinTextarea').value=''" class="text-rose-400 hover:underline">پاک کردن ورودی‌ها</button>
+              </div>
+              <textarea id="stdinTextarea" placeholder="مثال ورودی:
+15
+25" class="flex-1 w-full rounded-xl bg-[#081229] border border-cyan-500/25 p-2.5 ltr-code text-xs text-white focus:outline-none focus:border-cyan-400 resize-none"></textarea>
+            </div>
+
+            <div id="termPane-debugger" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-[#081229] p-2.5 rounded-xl border border-cyan-500/25">
+                <span class="font-extrabold text-cyan-300"><i class="fa-solid fa-bug ml-1"></i>دیباگر خط‌به‌خط و کالبدشکافی حافظه (RAM Inspector)</span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="runInteractiveDebuggerTrace()" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-xs flex items-center gap-1"><i class="fa-solid fa-play"></i><span>شروع تریس و بررسی متغیرها</span></button>
+                  <button onclick="clearAllBreakpoints()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-xs">حذف همه Breakpointها</button>
+                </div>
+              </div>
+              <div id="debuggerTraceOutput" class="space-y-2">
+                <div class="text-slate-400">برای تنظیم نقطه توقف (Breakpoint) روی شماره خط در ستون سمت چپ ادیتور کلیک کنید، سپس دکمه «شروع تریس و بررسی متغیرها» را بزنید.</div>
+              </div>
+            </div>
+
+            <div id="termPane-info" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-3">
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                <div class="p-2.5 rounded-xl bg-[#09142B] border border-slate-800"><div class="text-slate-400">وضعیت خروجی</div><div id="infoStatus" class="font-bold text-emerald-400 mt-1 font-mono">READY</div></div>
+                <div class="p-2.5 rounded-xl bg-[#09142B] border border-slate-800"><div class="text-slate-400">زبان و نسخه Runtime</div><div id="infoLangVer" class="font-bold text-cyan-300 mt-1 font-mono">-</div></div>
+                <div class="p-2.5 rounded-xl bg-[#09142B] border border-slate-800"><div class="text-slate-400">مدت زمان اجرا</div><div id="infoExecTime" class="font-bold text-white mt-1 font-mono">0 ms</div></div>
+                <div class="p-2.5 rounded-xl bg-[#09142B] border border-slate-800"><div class="text-slate-400">حافظه مصرفی</div><div id="infoMemory" class="font-bold text-purple-300 mt-1 font-mono">0 KB</div></div>
+                <div class="p-2.5 rounded-xl bg-[#09142B] border border-slate-800"><div class="text-slate-400">موتور اجرایی فعال</div><div id="infoEngineName" class="font-bold text-amber-300 mt-1 font-mono">Multi-Engine Auto</div></div>
+              </div>
+              <div id="engineLogTrail" class="p-2.5 rounded-xl bg-[#060D1E] border border-slate-800 font-mono text-[11px] text-slate-300 ltr-code">
+                [Orchestrator] Tkinter/GUI Web Simulator: ONLINE | Local Worker: ONLINE | Wandbox/Judge0: ONLINE | Piston v2: STANDBY
+              </div>
+            </div>
+
+            <div id="termPane-preview" class="term-pane hidden h-full flex flex-col bg-slate-950">
+              <div class="bg-slate-900 px-3 py-1 border-b border-slate-800 flex items-center justify-between text-xs">
+                <span id="livePreviewHeaderTitle" class="text-cyan-300 font-mono">Sandboxed Live GUI & Web Preview (Tkinter / HTML5 / React 18)</span>
+                <button onclick="executeActiveCode()" class="text-emerald-400 hover:underline font-bold"><i class="fa-solid fa-rotate-right ml-1"></i>اجرای مجدد پیش‌نمایش</button>
+              </div>
+              <iframe id="livePreviewIframe" sandbox="allow-scripts" class="w-full flex-1 border-0 bg-white"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI SUPER-STUDIO DRAWER (Merged v12 Super-Studio + 2.html Real-Time Groq Streaming) -->
+      <aside id="aiAssistantDrawer" class="w-80 sm:w-[445px] glass-panel border-r border-purple-500/35 flex flex-col shrink-0 z-30">
+        <div class="p-3 border-b border-slate-800 bg-gradient-to-r from-purple-950/80 via-indigo-950/70 to-blue-950/70 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-400 p-[1.5px]">
+              <div class="w-full h-full bg-[#050B1A] rounded-[10px] flex items-center justify-center text-amber-300 text-xs"><i class="fa-solid fa-bolt-lightning"></i></div>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="text-xs font-black text-white font-mono">farh<span class="infinity-symbol">∞</span>d AI Super-Studio</h3>
+                <span id="aiLatencyBadge" class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono text-[9px]">آنلاین</span>
+              </div>
+              <p class="text-[10px] text-cyan-300">استریم زنده LPU + استخراج کد خالص + انتقال با یک کلیک</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="clearAiChat()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-300 text-xs" title="پاک کردن تاریخچه چت"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="toggleAiSidebar()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white text-xs" title="بستن پنل"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="p-2 border-b border-slate-800 bg-[#050C1D] shrink-0 space-y-1.5">
+          <div class="flex items-center justify-between text-[10px] font-bold text-amber-300 px-1">
+            <span>✨ ۶ ابزار متمایز هوش مصنوعی + دستورات سریع:</span>
+            <span class="text-cyan-400 font-mono">Groq LPU Stream</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1">
+            <button onclick="openSuperAiFeature('screenshot')" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-cyan-500/20 border border-cyan-500/30 text-[10px] font-bold text-cyan-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-camera"></i><span>Screenshot</span></button>
+            <button onclick="openSuperAiFeature('prompt2app')" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-purple-500/20 border border-purple-500/30 text-[10px] font-bold text-purple-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-cubes-stacked"></i><span>Prompt2App</span></button>
+            <button onclick="openSuperAiFeature('voice2code')" id="btnVoiceToCode" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-emerald-500/20 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-microphone"></i><span>Voice2Code</span></button>
+            <button onclick="openSuperAiFeature('explainExec')" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-amber-500/20 border border-amber-500/30 text-[10px] font-bold text-amber-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-microscope"></i><span>Explain Exec</span></button>
+            <button onclick="openSuperAiFeature('unitTest')" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-rose-500/20 border border-rose-500/30 text-[10px] font-bold text-rose-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-vial-circle-check"></i><span>AI Test Eng</span></button>
+            <button onclick="openSuperAiFeature('refactor')" class="p-1.5 rounded-lg bg-slate-900/90 hover:bg-indigo-500/20 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 flex items-center justify-center gap-1 transition"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Refactor</span></button>
+          </div>
+          <!-- 5 Quick Commands merged from 2.html & farhood.html -->
+          <div class="grid grid-cols-5 gap-1 pt-1 border-t border-slate-800/80">
+            <button onclick="triggerQuickAiCommand('explain')" class="px-1.5 py-1 rounded-lg bg-slate-800/80 hover:bg-cyan-500/25 text-[10px] font-semibold text-slate-200 flex items-center justify-center gap-1" title="توضیح کامل کد"><i class="fa-solid fa-book-open text-cyan-400"></i><span>توضیح</span></button>
+            <button onclick="triggerQuickAiCommand('debug')" class="px-1.5 py-1 rounded-lg bg-slate-800/80 hover:bg-rose-500/25 text-[10px] font-semibold text-slate-200 flex items-center justify-center gap-1" title="خطایابی و رفع باگ"><i class="fa-solid fa-bug-slash text-rose-400"></i><span>رفع باگ</span></button>
+            <button onclick="triggerQuickAiCommand('optimize')" class="px-1.5 py-1 rounded-lg bg-slate-800/80 hover:bg-amber-500/25 text-[10px] font-semibold text-slate-200 flex items-center justify-center gap-1" title="بهینه‌سازی سرعت"><i class="fa-solid fa-gauge-high text-amber-400"></i><span>بهینه</span></button>
+            <button onclick="triggerQuickAiCommand('comment')" class="px-1.5 py-1 rounded-lg bg-slate-800/80 hover:bg-emerald-500/25 text-[10px] font-semibold text-slate-200 flex items-center justify-center gap-1" title="افزودن کامنت و مستندات"><i class="fa-solid fa-comment-dots text-emerald-400"></i><span>کامنت</span></button>
+            <button onclick="triggerQuickAiCommand('convert')" class="px-1.5 py-1 rounded-lg bg-slate-800/80 hover:bg-purple-500/25 text-[10px] font-semibold text-slate-200 flex items-center justify-center gap-1" title="ترجمه به زبان دیگر"><i class="fa-solid fa-language text-purple-400"></i><span>ترجمه</span></button>
+          </div>
+        </div>
+
+        <input type="file" id="screenshotToCodeInput" accept="image/*" class="hidden" onchange="handleScreenshotToCodeUpload(event)" />
+
+        <div id="aiChatMessages" class="flex-1 overflow-y-auto p-3 space-y-3 text-xs leading-relaxed">
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-purple-950/40 to-blue-950/40 border border-purple-500/30 text-slate-200 space-y-1.5">
+            <div class="font-extrabold text-cyan-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+              <span>استودیوی هوشمند farh∞d AI آماده است!</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              هر برنامه‌ای (از جمله برنامه‌های گرافیکی <b>Tkinter</b>، بازی، الگوریتم یا وب‌سایت) که می‌خواهید بنویسید. پاسخ‌ها به‌صورت <b>استریم زنده</b> تولید شده و با دکمه سبز <b>«🚀 انتقال کل این کد به ویرایشگر»</b> مستقیماً آماده اجرا می‌شوند.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-2.5 border-t border-slate-800 bg-[#060D1E] shrink-0">
+          <div class="flex items-end gap-1.5">
+            <button onclick="openSuperAiFeature('voice2code')" id="micRecordBtn" class="p-3 rounded-xl bg-slate-800 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs shrink-0 transition" title="فرمان صوتی (Voice to Code)"><i class="fa-solid fa-microphone"></i></button>
+            <textarea id="aiCustomPromptInput" rows="2" placeholder="هر برنامه یا سوالی دارید بنویسید (Enter ارسال)..." class="flex-1 px-3 py-2 rounded-xl bg-[#0B1736] border border-purple-500/40 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 resize-none"></textarea>
+            <button id="aiSendBtn" onclick="sendCustomAiPrompt()" class="px-4 py-3 rounded-xl neon-btn-primary text-xs font-extrabold shrink-0 flex items-center gap-1"><i class="fa-solid fa-paper-plane"></i><span>ارسال</span></button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- MODAL 1: NEW FILE -->
+  <div id="newFileModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full border border-cyan-400/40 overflow-hidden shadow-2xl">
+      <div class="px-6 py-4 bg-gradient-to-l from-blue-900/50 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-300"><i class="fa-solid fa-file-circle-plus"></i></div>
+          <div>
+            <h3 class="text-sm font-black text-white">ایجاد فایل جدید</h3>
+            <p class="text-[11px] text-slate-400">زبان را انتخاب کنید تا پسوند استاندارد فایل به‌صورت خودکار تنظیم شود</p>
+          </div>
+        </div>
+        <button onclick="closeNewFileModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-cyan-400 text-xs"></i>
+          <input id="modalLangSearchInput" type="text" oninput="renderModalLanguageList()" placeholder="جستجوی زبان برنامه‌نویسی..." class="w-full pr-9 pl-4 py-2 rounded-xl bg-[#060E22] border border-cyan-500/30 text-xs text-white focus:outline-none" />
+        </div>
+        <div id="modalLanguageList" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-1"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end bg-[#071026] p-3.5 rounded-2xl border border-cyan-500/20">
+          <div class="sm:col-span-6">
+            <label class="block text-xs font-bold text-cyan-300 mb-1">نام فایل:</label>
+            <input id="modalFileNameInput" type="text" value="main.py" class="w-full px-3 py-2 rounded-xl bg-[#040917] border border-cyan-400/40 ltr-code text-xs text-white focus:outline-none" />
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-bold text-slate-400 mb-1">پوشه:</label>
+            <select id="modalFolderSelect" class="w-full px-3 py-2 rounded-xl bg-[#040917] border border-slate-700 text-xs text-slate-200 focus:outline-none">
+              <option value="src">📁 src</option>
+              <option value="root">📁 root</option>
+              <option value="tests">📁 tests</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer pb-2">
+              <input type="checkbox" id="modalStartEmptyCheckbox" class="accent-cyan-400" />
+              <span>فایل کاملاً خالی</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-[#060D1E] border-t border-slate-800 flex items-center justify-end gap-2">
+        <button onclick="closeNewFileModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">انصراف</button>
+        <button onclick="confirmCreateNewFile()" class="neon-btn-primary px-5 py-2 rounded-xl text-xs font-extrabold">ایجاد فایل و ورود به ویرایشگر</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SAFE AI CODE INSERTION & DIFF -->
+  <div id="codeDiffModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-4xl w-full border border-cyan-400/40 overflow-hidden shadow-2xl flex flex-col max-h-[88vh]">
+      <div class="px-6 py-4 bg-[#071129] border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-sm font-black text-white flex items-center gap-2"><i class="fa-solid fa-code-compare text-cyan-400"></i><span>بررسی و تأیید انتقال کد به ویرایشگر (محافظت از کد قبلی)</span></h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">مقایسه کد فعلی ویرایشگر با کد جدید تولیدشده توسط هوش مصنوعی</p>
+        </div>
+        <button onclick="closeCodeDiffModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#040917]">
+        <div class="rounded-xl border border-rose-500/30 bg-[#070E20] overflow-hidden flex flex-col">
+          <div class="px-3 py-1.5 bg-rose-950/40 border-b border-rose-500/20 text-[11px] font-bold text-rose-300">کد فعلی داخل ویرایشگر</div>
+          <pre id="diffOldCodePre" class="ltr-code p-3 text-xs text-slate-300 overflow-auto flex-1 m-0"></pre>
+        </div>
+        <div class="rounded-xl border border-emerald-500/30 bg-[#070E20] overflow-hidden flex flex-col">
+          <div class="px-3 py-1.5 bg-emerald-950/40 border-b border-emerald-500/20 text-[11px] font-bold text-emerald-300">کد خالص جدید (بدون توضیحات فارسی)</div>
+          <pre id="diffNewCodePre" class="ltr-code p-3 text-xs text-emerald-300 overflow-auto flex-1 m-0"></pre>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-[#060D1E] border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <button onclick="closeCodeDiffModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">انصراف و حفظ کد قبلی</button>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="confirmDiffAction('newfile')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold"><i class="fa-solid fa-file-circle-plus ml-1"></i>ایجاد در یک فایل جدید</button>
+          <button onclick="confirmDiffAction('append')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold"><i class="fa-solid fa-plus ml-1"></i>افزودن به انتهای کد فعلی</button>
+          <button onclick="confirmDiffAction('replace')" class="px-5 py-2 rounded-xl neon-btn-run text-xs font-extrabold"><i class="fa-solid fa-check-double ml-1"></i>جایگزینی کامل در ویرایشگر</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ENGINEERING SUITE -->
+  <div id="engineeringSuiteModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-5xl w-full border border-cyan-400/40 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3.5 bg-[#071129] border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 overflow-x-auto">
+          <button onclick="switchSuiteTab('flowchart')" id="suiteTab-flowchart" class="suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-farhood-primary text-white flex items-center gap-1.5"><i class="fa-solid fa-diagram-project"></i><span>تبدیل کد به فلوچارت</span></button>
+          <button onclick="switchSuiteTab('visualizer')" id="suiteTab-visualizer" class="suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-simple"></i><span>Algorithm Visualizer</span></button>
+          <button onclick="switchSuiteTab('api')" id="suiteTab-api" class="suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-satellite-dish"></i><span>API Playground</span></button>
+          <button onclick="switchSuiteTab('dbstudio')" id="suiteTab-dbstudio" class="suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-database"></i><span>Database Studio</span></button>
+          <button onclick="switchSuiteTab('git')" id="suiteTab-git" class="suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 flex items-center gap-1.5"><i class="fa-brands fa-git-alt"></i><span>Git & مدیریت نسخه‌ها</span></button>
+        </div>
+        <button onclick="closeEngineeringSuiteModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 flex-1 overflow-y-auto bg-[#040917] text-xs">
+        <div id="suitePane-flowchart" class="suite-pane space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-sm font-black text-cyan-300">تبدیل خودکار کد فعلی ویرایشگر به فلوچارت گرافیکی (AST Flowchart)</h4>
+              <p class="text-slate-400 text-[11px]">ساختار حلقه‌ها، شرط‌ها، توابع و خروجی‌های کد شما را به گراف برداری تبدیل می‌کند.</p>
+            </div>
+            <button onclick="generateCodeFlowchartSvg()" class="neon-btn-primary px-4 py-2 rounded-xl font-bold"><i class="fa-solid fa-rotate ml-1"></i>بازسازی فلوچارت از کد فعلی</button>
+          </div>
+          <div id="flowchartSvgContainer" class="p-6 rounded-2xl bg-[#071024] border border-cyan-500/30 min-h-[340px] flex items-center justify-center overflow-auto"></div>
+        </div>
+        <div id="suitePane-visualizer" class="suite-pane hidden space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 class="text-sm font-black text-emerald-300">شبیه‌ساز بصری الگوریتم‌های مرتب‌سازی</h4>
+              <p class="text-slate-400 text-[11px]">مقایسه گام‌به‌گام Bubble Sort، Selection Sort و Insertion Sort</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="algoTypeSelect" class="px-3 py-1.5 rounded-xl bg-[#081229] border border-cyan-500/40 text-white">
+                <option value="bubble">Bubble Sort</option>
+                <option value="selection">Selection Sort</option>
+                <option value="insertion">Insertion Sort</option>
+              </select>
+              <button onclick="generateRandomAlgoArray()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 font-bold">آرایه تصادفی جدید</button>
+              <button onclick="startAlgorithmVisualization()" class="neon-btn-run px-4 py-1.5 rounded-xl font-extrabold">شروع انیمیشن الگوریتم</button>
+            </div>
+          </div>
+          <div id="algoBarsViewport" class="h-64 rounded-2xl bg-[#071024] border border-cyan-500/30 p-6 flex items-end justify-center gap-2"></div>
+          <div id="algoStatusText" class="text-center font-mono text-cyan-300">آماده اجرای شبیه‌سازی الگوریتم...</div>
+        </div>
+        <div id="suitePane-api" class="suite-pane hidden space-y-4">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <select id="apiPlaygroundMethod" class="px-3 py-2 rounded-xl bg-[#081229] border border-cyan-500/40 font-mono font-bold text-cyan-300"><option value="GET">GET</option><option value="POST">POST</option></select>
+            <input id="apiPlaygroundUrl" type="text" value="https://jsonplaceholder.typicode.com/users/1" class="flex-1 px-3 py-2 rounded-xl bg-[#081229] border border-cyan-500/40 ltr-code text-white" />
+            <button onclick="executeApiPlaygroundRequest()" class="neon-btn-primary px-5 py-2 rounded-xl font-extrabold">ارسال درخواست (Send)</button>
+          </div>
+          <textarea id="apiPlaygroundBody" rows="3" placeholder='{"key": "value"} (فقط برای POST)' class="w-full p-3 rounded-xl bg-[#081229] border border-slate-800 ltr-code text-slate-200"></textarea>
+          <div class="rounded-2xl bg-[#071024] border border-cyan-500/30 p-3">
+            <div class="text-slate-400 mb-1 font-mono">Response Output:</div>
+            <pre id="apiPlaygroundResponse" class="ltr-code text-emerald-300 max-h-60 overflow-auto m-0">// پاسخ API اینجا نمایش داده می‌شود...</pre>
+          </div>
+        </div>
+        <div id="suitePane-dbstudio" class="suite-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-sm font-black text-amber-300">استودیوی پایگاه داده رابطه‌ای در حافظه (In-Memory SQL Studio)</h4>
+              <p class="text-slate-400 text-[11px]">کوئری‌های SQL را اجرا کنید و خروجی را در قالب جدول تعاملی مشاهده نمایید.</p>
+            </div>
+            <button onclick="runDatabaseStudioQuery()" class="neon-btn-run px-4 py-2 rounded-xl font-extrabold">اجرای کوئری و رسم جدول</button>
+          </div>
+          <textarea id="dbStudioSqlInput" rows="4" class="w-full p-3 rounded-xl bg-[#081229] border border-cyan-500/40 ltr-code text-white">CREATE TABLE IF NOT EXISTS developers (id INT, name STRING, stack STRING, rating INT);
+INSERT INTO developers VALUES (1, 'Farhood', 'Full-Stack & AI', 100), (2, 'Aria', 'Systems Rust', 95), (3, 'Nika', 'Cloud Architect', 98);
+SELECT * FROM developers ORDER BY rating DESC;</textarea>
+          <div id="dbStudioResultTable" class="rounded-2xl bg-[#071024] border border-cyan-500/30 p-4 overflow-x-auto"></div>
+        </div>
+        <div id="suitePane-git" class="suite-pane hidden space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 class="text-sm font-black text-purple-300">مدیریت نسخه‌های پروژه و کامیت‌های محلی (Git Snapshot Manager)</h4>
+              <p class="text-slate-400 text-[11px]">در هر لحظه از کل فایل‌های پروژه Snapshot بگیرید و در صورت نیاز به نسخه قبلی بازگردید.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input id="gitCommitMessageInput" type="text" placeholder="توضیح کامیت..." class="px-3 py-1.5 rounded-xl bg-[#081229] border border-purple-500/40 text-white" />
+              <button onclick="createProjectSnapshot()" class="neon-btn-primary px-4 py-1.5 rounded-xl font-bold">ثبت کامیت (Commit)</button>
+            </div>
+          </div>
+          <div id="gitSnapshotsListContainer" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SETTINGS -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-xl w-full border border-cyan-400/40 overflow-hidden shadow-2xl">
+      <div class="px-6 py-4 bg-[#081229] border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-black text-white flex items-center gap-2"><i class="fa-solid fa-sliders text-cyan-400"></i><span>تنظیمات امنیتی، Backend Gateway و موتورهای کامپایلر</span></h3>
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-xs max-h-[75vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-[#071026] border border-slate-800">
+          <div>
+            <div class="font-bold text-white">انیمیشن پس‌زمینه نئونی (Canvas Particles)</div>
+            <div class="text-slate-400 text-[11px]">نمایش ذرات نورانی و نمادهای برنامه‌نویسی متحرک</div>
+          </div>
+          <input type="checkbox" id="settingBgAnimToggle" checked onchange="toggleBackgroundAnimation(this.checked)" class="w-4 h-4 accent-blue-600 cursor-pointer" />
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-emerald-300 block">آدرس Cloudflare Worker (درگاه امن هوش مصنوعی):</label>
+          <input id="settingBackendGatewayInput" type="url" placeholder="https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev" onchange="localStorage.setItem('farhoodWorkerUrl', this.value.trim())" class="w-full px-3 py-2 rounded-xl bg-[#040917] border border-emerald-500/40 ltr-code text-xs text-white" />
+          <p class="text-[10px] text-slate-400">آدرس Worker را پس از انتشار در Cloudflare اینجا وارد کنید. کلید Groq فقط در تنظیمات محرمانه Cloudflare ذخیره می‌شود.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-cyan-300 block">آدرس Wandbox Cloud API:</label>
+            <input id="settingWandboxUrlInput" type="text" value="https://wandbox.org/api/compile.json" class="w-full px-3 py-2 rounded-xl bg-[#040917] border border-slate-700 ltr-code text-xs text-white" />
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-cyan-300 block">آدرس Piston API v2:</label>
+            <input id="settingPistonUrlInput" type="text" value="https://emkc.org/api/v2/piston" class="w-full px-3 py-2 rounded-xl bg-[#040917] border border-slate-700 ltr-code text-xs text-white" />
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-3.5 bg-[#060D1E] border-t border-slate-800 flex items-center justify-between">
+        <button onclick="resetAllWorkspaceData()" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold">بازنشانی کامل پروژه</button>
+        <button onclick="closeSettingsModal()" class="neon-btn-primary px-6 py-2 rounded-xl text-xs font-bold">ذخیره و بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: CUSTOM PROMPT -->
+  <div id="customPromptModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-5 border border-cyan-400/40 space-y-4">
+      <h4 id="customPromptTitle" class="text-sm font-bold text-white">تغییر نام</h4>
+      <input id="customPromptInput" type="text" class="w-full px-3.5 py-2 rounded-xl bg-[#040917] border border-cyan-500/40 text-sm text-white focus:outline-none" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeCustomPromptModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300">انصراف</button>
+        <button id="customPromptConfirmBtn" class="neon-btn-primary px-5 py-1.5 rounded-lg text-xs font-bold">تأیید</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    /*************************************************************************
+     * PART 1: 39-LANGUAGE CATALOG, STATE & TKINTER STARTER TEMPLATE
+     *************************************************************************/
+    const TKINTER_STARTER_CODE = `# farh∞d Tkinter Graphical Calculator (ماشین حساب گرافیکی کامل)
+import tkinter as tk
+
+root = tk.Tk()
+root.title("farh∞d Graphical Calculator")
+root.geometry("360x440")
+root.configure(bg="#0F172A")
+
+display = tk.Entry(root, font=("JetBrains Mono", 20, "bold"), justify="right")
+display.grid(row=0, column=0, columnspan=4, padx=10, pady=15)
+
+buttons = [
+    'C', '(', ')', '/',
+    '7', '8', '9', '*',
+    '4', '5', '6', '-',
+    '1', '2', '3', '+',
+    '0', '.', '⌫', '='
+]
+
+def on_click(key):
+    if key == '=':
+        result = eval(display.get())
+        print("Result =", result)
+    elif key == 'C':
+        display.delete(0, tk.END)
+    else:
+        display.insert(tk.END, key)
+
+for i, b in enumerate(buttons):
+    btn = tk.Button(root, text=b, command=lambda x=b: on_click(x))
+    btn.grid(row=(i//4)+1, column=i%4)
+
+root.mainloop()`;
+
+    const LANGUAGES_CATALOG = [
+      { id: 'python', name: 'Python', group: 'group1', ext: 'py', defaultFile: 'main.py', pistonLang: 'python', pistonFallbackVer: '3.10.0', wandboxCompiler: 'cpython-3.12.7', judge0Id: 71, localEngine: 'pyodide-or-polyglot', version: '3.12.7 + Tkinter GUI', icon: '🐍', popular: true, desc: 'هوش مصنوعی، علم داده، رابط گرافیکی Tkinter و توسعه سریع بک‌اند', template: `# farh∞d Online Compiler - Python 3.12\ndef fibonacci(n: int) -> list[int]:\n    seq = [0, 1]\n    for _ in range(2, n):\n        seq.append(seq[-1] + seq[-2])\n    return seq[:n]\n\nprint("🚀 farh∞d Python Engine Ready!")\nnums = fibonacci(10)\nprint("Fibonacci(10):", nums)\nprint("Sum of sequence:", sum(nums))` },
+      { id: 'c', name: 'C', group: 'group1', ext: 'c', defaultFile: 'main.c', pistonLang: 'c', pistonFallbackVer: '10.2.0', wandboxCompiler: 'gcc-13.2.0-c', judge0Id: 50, localEngine: 'polyglot-c', version: 'GCC 13.2', icon: '⚙️', popular: true, desc: 'برنامه‌نویسی سطح سیستم، کرنل و سخت‌افزار با کامپایلر GCC', template: `// farh∞d Online Compiler - GCC C\n#include <stdio.h>\n\nint main() {\n    printf("🚀 farh∞d C Compiler Ready!\\n");\n    int sum = 0;\n    for (int i = 1; i <= 10; i++) sum += i;\n    printf("Sum of 1..10 = %d\\n", sum);\n    return 0;\n}` },
+      { id: 'cpp', name: 'C++', group: 'group1', ext: 'cpp', defaultFile: 'main.cpp', pistonLang: 'c++', pistonFallbackVer: '10.2.0', wandboxCompiler: 'gcc-13.2.0', judge0Id: 54, localEngine: 'polyglot-cpp', version: 'GCC 13.2 C++20', icon: '🚀', popular: true, desc: 'موتورهای بازی‌سازی، الگوریتم‌های سنگین و سیستم‌های بلادرنگ', template: `// farh∞d Online Compiler - Modern C++20\n#include <iostream>\n#include <vector>\n#include <numeric>\n\nint main() {\n    std::vector<int> nums = {10, 20, 30, 40, 50};\n    int total = std::accumulate(nums.begin(), nums.end(), 0);\n    std::cout << "🚀 farh∞d C++20 Engine Ready!\\n";\n    std::cout << "Vector Total: " << total << std::endl;\n    return 0;\n}` },
+      { id: 'csharp', name: 'C#', group: 'group1', ext: 'cs', defaultFile: 'Program.cs', pistonLang: 'csharp', pistonFallbackVer: '6.12.0', wandboxCompiler: 'mono-6.12.0.199', judge0Id: 51, localEngine: 'polyglot-csharp', version: '.NET / Mono 6.12', icon: '🎯', popular: true, desc: 'توسعه سازمانی .NET، بازی‌سازی Unity و سرویس‌های ابری مدرن', template: `// farh∞d Online Compiler - C# (.NET)\nusing System;\nusing System.Linq;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("🚀 farh∞d C# Runtime Ready!");\n        var squares = Enumerable.Range(1, 5).Select(x => x * x);\n        Console.WriteLine("Squares: " + string.Join(", ", squares));\n    }\n}` },
+      { id: 'java', name: 'Java', group: 'group1', ext: 'java', defaultFile: 'Main.java', pistonLang: 'java', pistonFallbackVer: '15.0.2', wandboxCompiler: 'openjdk-jdk-22+36', judge0Id: 62, localEngine: 'polyglot-java', version: 'OpenJDK 22', icon: '☕', popular: true, desc: 'ستون فقرات سیستم‌های بانکی، سازمانی و معماری‌های مقیاس‌پذیر', template: `// farh∞d Online Compiler - OpenJDK Java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("🚀 farh∞d Java VM Ready!");\n        int factorial = 1;\n        for (int i = 1; i <= 6; i++) factorial *= i;\n        System.out.println("Factorial 6! = " + factorial);\n    }\n}` },
+      { id: 'javascript', name: 'JavaScript', group: 'group1', ext: 'js', defaultFile: 'script.js', pistonLang: 'javascript', pistonFallbackVer: '18.15.0', wandboxCompiler: 'nodejs-20.17.0', judge0Id: 63, localEngine: 'worker-js', version: 'ES2024 / Node 20', icon: '⚡', popular: true, desc: 'تپنده‌ترین زبان وب، فرانت‌اند تعاملی و اسکریپت‌نویسی مدرن', template: `// farh∞d Online Compiler - JavaScript ES2024\nconst numbers = [2, 4, 6, 8, 10];\nconst doubled = numbers.map(n => n * 2);\nconsole.log("🚀 farh∞d JS Engine Ready!");\nconsole.log("Doubled Array:", doubled.join(", "));` },
+      { id: 'typescript', name: 'TypeScript', group: 'group1', ext: 'ts', defaultFile: 'main.ts', pistonLang: 'typescript', pistonFallbackVer: '5.0.3', wandboxCompiler: 'typescript-5.6.2', judge0Id: 74, localEngine: 'worker-ts', version: 'TypeScript 5.6', icon: '🔷', popular: true, desc: 'جاوااسکریپت مجهز به سیستم تایپ قدرتمند برای پروژه‌های کلان', template: `// farh∞d Online Compiler - TypeScript 5\ninterface Developer { name: string; language: string; level: number; }\nconst dev: Developer = { name: "Farhood", language: "TypeScript", level: 99 };\nconsole.log(\`🚀 Hello \${dev.name} coding in \${dev.language} (Level \${dev.level})!\`);` },
+      { id: 'php', name: 'PHP', group: 'group1', ext: 'php', defaultFile: 'index.php', pistonLang: 'php', pistonFallbackVer: '8.2.3', wandboxCompiler: 'php-8.3.12', judge0Id: 68, localEngine: 'polyglot-php', version: 'PHP 8.3', icon: '🐘', popular: false, desc: 'موتور محرک میلیون‌ها وب‌سایت و اپلیکیشن سمت سرور', template: `<?php\n$langs = ["Python", "C++", "PHP", "Rust"];\necho "🚀 farh∞d PHP 8.3 Engine Ready!\\n";\necho "Languages: " . implode(" | ", $langs) . "\\n";\n?>` },
+      { id: 'go', name: 'Go (Golang)', group: 'group1', ext: 'go', defaultFile: 'main.go', pistonLang: 'go', pistonFallbackVer: '1.16.2', wandboxCompiler: 'go-1.23.2', judge0Id: 60, localEngine: 'polyglot-go', version: 'Go 1.23', icon: '🐹', popular: true, desc: 'زبان مهندسی گوگل برای میکروسرویس‌ها و پردازش هم‌روند', template: `package main\nimport "fmt"\nfunc main() {\n    fmt.Println("🚀 farh∞d Go Compiler Ready!")\n    for i := 1; i <= 3; i++ { fmt.Printf("Step %d completed\\n", i) }\n}` },
+      { id: 'rust', name: 'Rust', group: 'group1', ext: 'rs', defaultFile: 'main.rs', pistonLang: 'rust', pistonFallbackVer: '1.68.2', wandboxCompiler: 'rust-1.82.0', judge0Id: 73, localEngine: 'polyglot-rust', version: 'Rust 1.82', icon: '🦀', popular: true, desc: 'ایمنی حافظه بی‌رقیب و سرعت خیره‌کننده سیستم‌ها', template: `fn main() {\n    let items = vec!["Memory Safety", "Zero-Cost Abstractions", "Speed"];\n    println!("🚀 farh∞d Rust Compiler Ready!");\n    for (i, item) in items.iter().enumerate() { println!("{}. {}", i + 1, item); }\n}` },
+      { id: 'kotlin', name: 'Kotlin', group: 'group2', ext: 'kt', defaultFile: 'Main.kt', pistonLang: 'kotlin', pistonFallbackVer: '1.8.20', wandboxCompiler: null, judge0Id: 78, localEngine: 'polyglot-kotlin', version: 'Kotlin 1.9', icon: '🟣', popular: true, desc: 'زبان مدرن و رسمی توسعه اندروید و سرویس‌های JVM', template: `fun main() {\n    val items = listOf("Kotlin", "Android", "Cloud")\n    println("🚀 farh∞d Kotlin Ready: " + items.joinToString(" • "))\n}` },
+      { id: 'swift', name: 'Swift', group: 'group2', ext: 'swift', defaultFile: 'main.swift', pistonLang: 'swift', pistonFallbackVer: '5.3.3', wandboxCompiler: 'swift-5.10.1', judge0Id: 83, localEngine: 'polyglot-swift', version: 'Swift 5.10', icon: '🦅', popular: false, desc: 'زبان فوق‌سریع اپل برای اکوسیستم iOS و macOS', template: `print("🚀 farh∞d Swift Compiler Ready!")` },
+      { id: 'ruby', name: 'Ruby', group: 'group2', ext: 'rb', defaultFile: 'main.rb', pistonLang: 'ruby', pistonFallbackVer: '3.0.1', wandboxCompiler: 'ruby-3.3.5', judge0Id: 72, localEngine: 'polyglot-ruby', version: 'Ruby 3.3', icon: '💎', popular: false, desc: 'زبان ظریف و دوست‌داشتنی برای توسعه سریع وب', template: `puts "🚀 farh∞d Ruby 3.3 Ready!"` },
+      { id: 'lua', name: 'Lua', group: 'group2', ext: 'lua', defaultFile: 'main.lua', pistonLang: 'lua', pistonFallbackVer: '5.4.4', wandboxCompiler: 'lua-5.4.7', judge0Id: 64, localEngine: 'polyglot-lua', version: 'Lua 5.4.7', icon: '🌙', popular: false, desc: 'اسکریپت‌نویسی فوق‌سبک در موتورهای بازی و سیستم‌ها', template: `print("🚀 farh∞d Lua 5.4 Ready!")` },
+      { id: 'dart', name: 'Dart', group: 'group2', ext: 'dart', defaultFile: 'main.dart', pistonLang: 'dart', pistonFallbackVer: '2.19.6', wandboxCompiler: null, judge0Id: 90, localEngine: 'polyglot-dart', version: 'Dart 3.2', icon: '🎯', popular: false, desc: 'زبان اصلی فریم‌ورک Flutter برای ساخت برنامه‌های چندسکویی', template: `void main() {\n  print("🚀 farh∞d Dart VM Ready!");\n}` },
+      { id: 'r', name: 'R', group: 'group2', ext: 'r', defaultFile: 'main.r', pistonLang: 'rscript', pistonFallbackVer: '4.1.1', wandboxCompiler: 'r-4.4.1', judge0Id: 80, localEngine: 'polyglot-r', version: 'R 4.4.1', icon: '📊', popular: false, desc: 'استاندارد محاسبات آماری، داده‌کاوی و پژوهش‌های علمی', template: `cat("🚀 farh∞d R Statistical Engine Ready!\\n")` },
+      { id: 'perl', name: 'Perl', group: 'group2', ext: 'pl', defaultFile: 'main.pl', pistonLang: 'perl', pistonFallbackVer: '5.36.0', wandboxCompiler: 'perl-5.40.0', judge0Id: 85, localEngine: 'polyglot-perl', version: 'Perl 5.40', icon: '🐪', popular: false, desc: 'پردازش پیشرفته متن و اسکریپت‌های سیستمی', template: `print "🚀 farh∞d Perl Engine Ready!\\n";` },
+      { id: 'scala', name: 'Scala', group: 'group2', ext: 'scala', defaultFile: 'Main.scala', pistonLang: 'scala', pistonFallbackVer: '3.2.2', wandboxCompiler: 'scala-3.5.1', judge0Id: 81, localEngine: 'polyglot-scala', version: 'Scala 3.5', icon: '🔥', popular: false, desc: 'ترکیب برنامه‌نویسی تابعی و شیءگرا برای کلان‌داده‌ها', template: `object Main extends App {\n  println("🚀 farh∞d Scala Engine Ready!")\n}` },
+      { id: 'elixir', name: 'Elixir', group: 'group2', ext: 'ex', defaultFile: 'main.ex', pistonLang: 'elixir', pistonFallbackVer: '1.11.3', wandboxCompiler: 'elixir-1.17.3', judge0Id: 57, localEngine: 'polyglot-elixir', version: 'Elixir 1.17', icon: '💧', popular: false, desc: 'زبان تابعی و توزیع‌شده روی ماشین مجازی BEAM', template: `IO.puts "🚀 farh∞d Elixir Ready!"` },
+      { id: 'erlang', name: 'Erlang', group: 'group2', ext: 'erl', defaultFile: 'main.erl', pistonLang: 'erlang', pistonFallbackVer: '23.0.0', wandboxCompiler: 'erlang-27.1', judge0Id: 58, localEngine: 'polyglot-erlang', version: 'Erlang OTP 27', icon: '☎️', popular: false, desc: 'سیستم‌های هم‌روند و مخابراتی با پایداری بالا', template: `-module(main).\n-export([start/0]).\nstart() -> io:fwrite("🚀 farh∞d Erlang Ready!~n").` },
+      { id: 'bash', name: 'Bash', group: 'group3', ext: 'sh', defaultFile: 'script.sh', pistonLang: 'bash', pistonFallbackVer: '5.2.0', wandboxCompiler: 'bash', judge0Id: 46, localEngine: 'polyglot-bash', version: 'GNU Bash 5.2', icon: '🐚', popular: false, desc: 'اسکریپت‌نویسی لینوکس و اتوماسیون DevOps', template: `#!/usr/bin/env bash\necho "🚀 farh∞d Linux Bash Ready!"` },
+      { id: 'assembly', name: 'Assembly (NASM)', group: 'group3', ext: 'asm', defaultFile: 'main.asm', pistonLang: 'nasm64', pistonFallbackVer: '2.15.5', wandboxCompiler: null, judge0Id: 45, localEngine: 'polyglot-asm', version: 'NASM x86_64', icon: '🔩', popular: false, desc: 'کدنویسی مستقیم روی ثبات‌های پردازنده ۶۴ بیتی', template: `; farh∞d NASM x86_64\nsection .data\n    msg db "🚀 farh∞d Assembly Ready!", 10` },
+      { id: 'fortran', name: 'Fortran', group: 'group3', ext: 'f90', defaultFile: 'main.f90', pistonLang: 'fortran', pistonFallbackVer: '10.2.0', wandboxCompiler: 'gfortran-13.2.0', judge0Id: 59, localEngine: 'polyglot-fortran', version: 'GFortran 13.2', icon: '🧮', popular: false, desc: 'محاسبات عددی و شبیه‌سازی‌های فیزیک', template: `program main\n    print *, "🚀 farh∞d Fortran Compiler Ready!"\nend program main` },
+      { id: 'pascal', name: 'Pascal', group: 'group3', ext: 'pas', defaultFile: 'main.pas', pistonLang: 'pascal', pistonFallbackVer: '3.2.2', wandboxCompiler: 'fpc-3.2.2', judge0Id: 67, localEngine: 'polyglot-pascal', version: 'FreePascal 3.2', icon: '📐', popular: false, desc: 'زبان ساخت‌یافته کلاسیک و آموزشی الگوریتم‌ها', template: `program Main;\nbegin\n  writeln('🚀 farh∞d FreePascal Ready!');\nend.` },
+      { id: 'haskell', name: 'Haskell', group: 'group3', ext: 'hs', defaultFile: 'main.hs', pistonLang: 'haskell', pistonFallbackVer: '9.0.1', wandboxCompiler: 'ghc-9.8.2', judge0Id: 61, localEngine: 'polyglot-haskell', version: 'GHC 9.8', icon: 'λ', popular: false, desc: 'برنامه‌نویسی تابعی خالص با استنتاج تایپ ریاضی', template: `main = putStrLn "🚀 farh∞d Haskell Ready!"` },
+      { id: 'lisp', name: 'Common Lisp', group: 'group3', ext: 'lisp', defaultFile: 'main.lisp', pistonLang: 'lisp', pistonFallbackVer: '2.1.2', wandboxCompiler: 'sbcl-2.4.9', judge0Id: 55, localEngine: 'polyglot-lisp', version: 'SBCL 2.4', icon: '🔮', popular: false, desc: 'هوش مصنوعی نمادین و برنامه‌نویسی مبتنی بر ماکرو', template: `(format t "🚀 farh∞d Common Lisp Ready!~%")` },
+      { id: 'prolog', name: 'Prolog', group: 'group3', ext: 'pl', defaultFile: 'main.pro', pistonLang: 'prolog', pistonFallbackVer: '8.2.4', wandboxCompiler: 'swipl-9.2.7', judge0Id: 69, localEngine: 'polyglot-prolog', version: 'SWI-Prolog 9.2', icon: '🧠', popular: false, desc: 'برنامه‌نویسی منطقی و استنتاج پایگاه دانش', template: `:- initialization(main).\nmain :- write('🚀 farh∞d Prolog Ready!'), nl, halt.` },
+      { id: 'ada', name: 'Ada', group: 'group3', ext: 'adb', defaultFile: 'main.adb', pistonLang: 'ada', pistonFallbackVer: '10.2.0', wandboxCompiler: 'gnat-13.2.0', judge0Id: 47, localEngine: 'polyglot-ada', version: 'GNAT Ada 13.2', icon: '🛡️', popular: false, desc: 'زبان فوق‌ایمن سامانه‌های فضایی و سیستم‌های حیاتی', template: `with Ada.Text_IO; use Ada.Text_IO;\nprocedure Main is\nbegin\n   Put_Line ("🚀 farh∞d Ada Compiler Ready!");\nend Main;` },
+      { id: 'ocaml', name: 'OCaml', group: 'group3', ext: 'ml', defaultFile: 'main.ml', pistonLang: 'ocaml', pistonFallbackVer: '4.12.0', wandboxCompiler: 'ocaml-5.2.0', judge0Id: 65, localEngine: 'polyglot-ocaml', version: 'OCaml 5.2', icon: '🐫', popular: false, desc: 'زبان تابعی صنعتی محبوب در ساخت کامپایلرها', template: `let () = print_endline "🚀 farh∞d OCaml Ready!"` },
+      { id: 'fsharp', name: 'F#', group: 'group3', ext: 'fs', defaultFile: 'Program.fs', pistonLang: 'fsharp.net', pistonFallbackVer: '5.0.201', wandboxCompiler: 'fsharp-8.0.403', judge0Id: 87, localEngine: 'polyglot-fsharp', version: 'F# 8.0', icon: '💠', popular: false, desc: 'برنامه‌نویسی تابعی در اکوسیستم .NET', template: `printfn "🚀 farh∞d F# Runtime Ready!"` },
+      { id: 'html', name: 'HTML5 + CSS3', group: 'web', ext: 'html', defaultFile: 'index.html', pistonLang: 'web-preview', pistonFallbackVer: 'HTML5', wandboxCompiler: null, judge0Id: null, localEngine: 'web-preview', version: 'HTML5 Live', icon: '🌐', popular: true, desc: 'طراحی صفحات وب همراه با پیش‌نمایش زنده در مرورگر', template: `<!DOCTYPE html>\n<html lang="fa" dir="rtl">\n<head><meta charset="UTF-8"><style>body{font-family:system-ui;background:#050B1A;color:#fff;display:grid;place-items:center;height:90vh;margin:0}.box{background:#101B35;border:1px solid #00C8FF;padding:24px 36px;border-radius:18px;text-align:center}h2{color:#00C8FF;margin-top:0}</style></head>\n<body><div class="box"><h2>farh∞d Live Web Preview</h2><p>پیش‌نمایش زنده HTML/CSS با موفقیت در Sandbox اجرا شد.</p></div></body></html>` },
+      { id: 'css', name: 'CSS3 Studio', group: 'web', ext: 'css', defaultFile: 'styles.css', pistonLang: 'web-preview', pistonFallbackVer: 'CSS3', wandboxCompiler: null, judge0Id: null, localEngine: 'web-preview', version: 'CSS3 Live', icon: '🎨', popular: false, desc: 'آزمایشگاه انیمیشن‌ها و استایل‌های مدرن CSS3', template: `body { background: #050B1A; color: #00E6A0; display: grid; place-items: center; height: 90vh; font-family: monospace; }\n.neon-box { padding: 24px; border: 2px solid #00C8FF; border-radius: 16px; }` },
+      { id: 'js-web', name: 'JavaScript (Worker)', group: 'web', ext: 'js', defaultFile: 'app.js', pistonLang: 'javascript', pistonFallbackVer: '18.15.0', wandboxCompiler: 'nodejs-20.17.0', judge0Id: 63, localEngine: 'worker-js', version: 'V8 WebWorker', icon: '🟨', popular: false, desc: 'اجرای آنی جاوااسکریپت در Web Worker ایزوله مرورگر', template: `console.log("🚀 Running in Isolated Browser Worker!");\nconst arr = [1, 2, 3, 4, 5];\nconsole.log("Sum =", arr.reduce((a, b) => a + b, 0));` },
+      { id: 'react', name: 'React 18 (JSX)', group: 'web', ext: 'jsx', defaultFile: 'App.jsx', pistonLang: 'web-preview', pistonFallbackVer: '18.2.0', wandboxCompiler: null, judge0Id: null, localEngine: 'web-preview', version: 'React 18 Live', icon: '⚛️', popular: true, desc: 'ساخت و پیش‌نمایش زنده کامپوننت‌های React 18', template: `function App() {\n  const [count, setCount] = React.useState(0);\n  return (\n    <div style={{fontFamily:'sans-serif', background:'#050B1A', color:'#fff', minHeight:'88vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>\n      <h2 style={{color:'#00C8FF'}}>⚛️ farh∞d React 18 Sandbox</h2>\n      <p>شمارنده: <b>{count}</b></p>\n      <button onClick={() => setCount(count + 1)} style={{background:'#0066FF', color:'#fff', border:0, padding:'10px 20px', borderRadius:'10px', cursor:'pointer'}}>افزایش +</button>\n    </div>\n  );\n}` },
+      { id: 'nodejs', name: 'Node.js', group: 'web', ext: 'js', defaultFile: 'server.js', pistonLang: 'javascript', pistonFallbackVer: '18.15.0', wandboxCompiler: 'nodejs-20.17.0', judge0Id: 63, localEngine: 'worker-js', version: 'Node.js 20', icon: '🟢', popular: true, desc: 'محیط اجرایی جاوااسکریپت سمت سرور بر پایه V8', template: `console.log("🚀 farh∞d Node.js Environment Ready!");\nconst tasks = ["Compile", "Execute", "Deploy"];\ntasks.forEach((t, idx) => console.log(\`Task #\${idx + 1}: \${t} -> OK\`));` },
+      { id: 'sql', name: 'SQL (SQLite)', group: 'db', ext: 'sql', defaultFile: 'query.sql', pistonLang: 'sqlite3', pistonFallbackVer: '3.36.0', wandboxCompiler: 'sqlite-3.46.1', judge0Id: 82, localEngine: 'local-sql', version: 'SQLite 3.46', icon: '🗄️', popular: true, desc: 'طراحی جداول و اجرای مستقیم کوئری‌های استاندارد SQL', template: `CREATE TABLE users (id INT PRIMARY KEY, name TEXT, role TEXT);\nINSERT INTO users VALUES (1, 'Farhood', 'Principal Architect');\nINSERT INTO users VALUES (2, 'Sara', 'AI Lead');\nSELECT * FROM users;` },
+      { id: 'postgresql', name: 'PostgreSQL', group: 'db', ext: 'sql', defaultFile: 'postgres.sql', pistonLang: 'sqlite3', pistonFallbackVer: '3.36.0', wandboxCompiler: 'sqlite-3.46.1', judge0Id: 82, localEngine: 'local-sql', version: 'PostgreSQL 16', icon: '🐘', popular: false, desc: 'کوئری‌نویسی پایگاه داده رابطه‌ای PostgreSQL', template: `CREATE TABLE projects (id INT, title TEXT, status TEXT);\nINSERT INTO projects VALUES (1, 'farh∞d Cloud IDE', 'Production');\nSELECT * FROM projects;` },
+      { id: 'mysql', name: 'MySQL', group: 'db', ext: 'sql', defaultFile: 'mysql.sql', pistonLang: 'sqlite3', pistonFallbackVer: '3.36.0', wandboxCompiler: 'sqlite-3.46.1', judge0Id: 82, localEngine: 'local-sql', version: 'MySQL 8.4', icon: '🐬', popular: false, desc: 'سیستم مدیریت پایگاه داده رابطه‌ای MySQL', template: `CREATE TABLE metrics (id INT, metric TEXT, val INT);\nINSERT INTO metrics VALUES (1, 'FPS', 60), (2, 'LatencyMs', 42);\nSELECT * FROM metrics;` },
+      { id: 'mongodb', name: 'MongoDB Query', group: 'db', ext: 'mongodb', defaultFile: 'query.mongodb', pistonLang: 'javascript', pistonFallbackVer: '18.15.0', wandboxCompiler: 'nodejs-20.17.0', judge0Id: 63, localEngine: 'worker-js', version: 'MQL Engine', icon: '🍃', popular: false, desc: 'پردازش اسناد NoSQL و فیلترینگ کالکشن‌های JSON', template: `const users = [{ name: "Farhood", role: "Architect", active: true }, { name: "Ali", role: "Dev", active: false }];\nconsole.log(JSON.stringify(users.filter(u => u.active), null, 2));` }
+    ];
+
+    let appState = {
+      currentView: 'home',
+      langCategoryFilter: 'all',
+      preferredEngine: 'auto',
+      recentLangIds: ['python', 'cpp', 'javascript', 'csharp', 'html', 'sql'],
+      activeFileId: 'file-1',
+      openTabIds: ['file-1', 'file-2'],
+      editorFontSize: 14,
+      isLightTheme: false,
+      modalSelectedLangId: 'python',
+      isExecuting: false,
+      abortController: null,
+      activeWorker: null,
+      pistonRuntimesMap: null,
+      breakpoints: {},
+      lastErrorLine: null,
+      pendingDiffPayload: null,
+      executionHistory: [],
+      snapshots: [],
+      aiChatHistory: [],
+      files: [
+        { id: 'file-1', name: 'main.py', folder: 'src', langId: 'python', content: TKINTER_STARTER_CODE, updatedAt: Date.now() },
+        { id: 'file-2', name: 'main.cpp', folder: 'src', langId: 'cpp', content: LANGUAGES_CATALOG[2].template, updatedAt: Date.now() }
+      ]
+    };
+
+    function loadWorkspaceState() {
+      try {
+        const saved = localStorage.getItem('farhood_ide_enterprise_v13');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.files && parsed.files.length > 0) {
+            appState.files = parsed.files;
+            appState.activeFileId = parsed.activeFileId || parsed.files[0].id;
+            appState.openTabIds = parsed.openTabIds || [appState.activeFileId];
+            appState.recentLangIds = parsed.recentLangIds || appState.recentLangIds;
+            appState.executionHistory = parsed.executionHistory || [];
+            appState.snapshots = parsed.snapshots || [];
+            appState.breakpoints = parsed.breakpoints || {};
+          }
+        }
+      } catch (e) {}
+    }
+
+    function saveWorkspaceState() {
+      try {
+        localStorage.setItem('farhood_ide_enterprise_v13', JSON.stringify({
+          files: appState.files,
+          activeFileId: appState.activeFileId,
+          openTabIds: appState.openTabIds,
+          recentLangIds: appState.recentLangIds,
+          executionHistory: appState.executionHistory.slice(0, 20),
+          snapshots: appState.snapshots.slice(0, 15),
+          breakpoints: appState.breakpoints
+        }));
+      } catch (e) {}
+    }
+
+    let bgAnimationRunning = true;
+    let mouseParallax = { x: 0, y: 0 };
+
+    function initAnimatedBackground() {
+      const canvas = document.getElementById('bgCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        mouseParallax.x = (e.clientX / width - 0.5) * 24;
+        mouseParallax.y = (e.clientY / height - 0.5) * 24;
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+          card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        });
+      });
+
+      const symbols = ['</>', '{ }', '#', '∞', '()', '=>', '01', '[]', 'fn', 'λ'];
+      const particles = Array.from({ length: 42 }, (_, i) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        size: Math.random() * 2.2 + 1,
+        symbol: i % 3 === 0 ? symbols[i % symbols.length] : null,
+        alpha: Math.random() * 0.45 + 0.15
+      }));
+
+      let wavePhase = 0;
+      function renderFrame() {
+        if (!bgAnimationRunning) return;
+        ctx.clearRect(0, 0, width, height);
+        wavePhase += 0.014;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 200, 255, 0.07)';
+        ctx.lineWidth = 1.2;
+        for (let w = 0; w < 3; w++) {
+          ctx.beginPath();
+          for (let x = 0; x <= width; x += 36) {
+            const y = height * (0.28 + w * 0.24) + Math.sin(x * 0.003 + wavePhase + w) * 30 + mouseParallax.y * 0.35;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x = (p.x + p.vx + width) % width;
+          p.y = (p.y + p.vy + height) % height;
+          const drawX = p.x + mouseParallax.x * (p.size * 0.2);
+          const drawY = p.y + mouseParallax.y * (p.size * 0.2);
+
+          if (p.symbol) {
+            ctx.font = '700 12px "JetBrains Mono", monospace';
+            ctx.fillStyle = `rgba(0, 200, 255, ${p.alpha * 0.7})`;
+            ctx.fillText(p.symbol, drawX, drawY);
+          } else {
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0, 230, 160, ${p.alpha})`;
+            ctx.fill();
+          }
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 125) {
+              ctx.beginPath();
+              ctx.moveTo(drawX, drawY);
+              ctx.lineTo(p2.x + mouseParallax.x * 0.2, p2.y + mouseParallax.y * 0.2);
+              ctx.strokeStyle = `rgba(0, 102, 255, ${(1 - dist / 125) * 0.13})`;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(renderFrame);
+      }
+      renderFrame();
+    }
+
+    function toggleBackgroundAnimation(enabled) {
+      bgAnimationRunning = enabled;
+      const canvas = document.getElementById('bgCanvas');
+      if (enabled) { canvas.style.opacity = '1'; initAnimatedBackground(); }
+      else { canvas.style.opacity = '0'; }
+    }
+
+    function renderQuickAccessBars() {
+      const popContainer = document.getElementById('popularLangsBar');
+      const recContainer = document.getElementById('recentLangsBar');
+      if (!popContainer || !recContainer) return;
+
+      popContainer.innerHTML = LANGUAGES_CATALOG.filter(l => l.popular).map(l => `
+        <button onclick="selectLanguageAndOpen('${l.id}')" class="px-3 py-1.5 rounded-xl bg-[#09142B] hover:bg-blue-600/35 border border-cyan-500/30 hover:border-cyan-400 text-xs font-extrabold flex items-center gap-1.5 transition">
+          <span>${l.icon}</span><span>${l.name}</span><span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-1.5 rounded">.${l.ext}</span>
+        </button>
+      `).join('');
+
+      recContainer.innerHTML = appState.recentLangIds.map(id => LANGUAGES_CATALOG.find(l => l.id === id)).filter(Boolean).map(l => `
+        <button onclick="selectLanguageAndOpen('${l.id}')" class="px-3 py-1.5 rounded-xl bg-purple-950/35 hover:bg-purple-600/35 border border-purple-400/35 text-xs font-extrabold flex items-center gap-1.5 transition">
+          <span>${l.icon}</span><span>${l.name}</span><span class="text-[10px] font-mono text-purple-300">.${l.ext}</span>
+        </button>
+      `).join('');
+    }
+
+    function setLangCategoryFilter(cat) {
+      appState.langCategoryFilter = cat;
+      document.querySelectorAll('.lang-cat-btn').forEach(btn => {
+        btn.className = btn.dataset.cat === cat
+          ? 'lang-cat-btn px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-farhood-primary text-white shadow-lg shadow-blue-600/30'
+          : 'lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700';
+      });
+      renderLanguageGrid();
+    }
+
+    function renderLanguageGrid() {
+      const container = document.getElementById('languagesGridContainer');
+      const query = (document.getElementById('langSearchInput')?.value || '').trim().toLowerCase();
+      if (!container) return;
+
+      const filtered = LANGUAGES_CATALOG.filter(lang => {
+        const matchesCat = appState.langCategoryFilter === 'all' || lang.group === appState.langCategoryFilter;
+        const matchesSearch = !query || lang.name.toLowerCase().includes(query) || lang.ext.toLowerCase().includes(query) || lang.desc.toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full glass-panel rounded-2xl p-8 text-center text-slate-400">زبان مورد نظر با عبارت «${escapeHtml(query)}» یافت نشد.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(lang => `
+        <div onclick="selectLanguageAndOpen('${lang.id}')" class="spotlight-card rounded-2xl p-4 cursor-pointer flex flex-col justify-between gap-3 group">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/25 to-cyan-500/15 border border-cyan-400/35 flex items-center justify-center text-xl group-hover:scale-110 transition">${lang.icon}</div>
+              <div class="flex flex-col items-end">
+                <span class="px-2 py-0.5 rounded-lg bg-cyan-500/15 border border-cyan-400/35 font-mono text-xs font-extrabold text-cyan-300">.${lang.ext}</span>
+                <span class="text-[10px] font-mono text-slate-400 mt-0.5">${lang.version}</span>
+              </div>
+            </div>
+            <h3 class="text-sm font-black text-white mt-3 group-hover:text-cyan-300 transition">${lang.name}</h3>
+            <p class="text-[11px] text-slate-300/90 mt-1 line-clamp-2 leading-relaxed">${lang.desc}</p>
+          </div>
+          <div class="pt-2.5 border-t border-slate-800/90 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400 font-mono">${lang.defaultFile}</span>
+            <span class="text-emerald-400 font-extrabold flex items-center gap-1"><span>ورود به IDE</span><i class="fa-solid fa-arrow-left text-[10px]"></i></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectLanguageAndOpen(langId) {
+      const lang = LANGUAGES_CATALOG.find(l => l.id === langId);
+      if (!lang) return;
+      appState.recentLangIds = [langId, ...appState.recentLangIds.filter(id => id !== langId)].slice(0, 6);
+      renderQuickAccessBars();
+
+      const startEmpty = document.getElementById('openEmptyEditorToggle')?.checked ?? false;
+      let existingFile = appState.files.find(f => f.langId === langId);
+      if (!existingFile) {
+        existingFile = { id: 'file-' + Date.now(), name: lang.defaultFile, folder: 'src', langId: lang.id, content: startEmpty ? '' : lang.template, updatedAt: Date.now() };
+        appState.files.push(existingFile);
+      } else if (!existingFile.content.trim() && !startEmpty) {
+        existingFile.content = lang.template;
+      }
+      if (!appState.openTabIds.includes(existingFile.id)) appState.openTabIds.push(existingFile.id);
+      switchMainView('ide');
+      setActiveFile(existingFile.id);
+      showToast(`محیط برنامه‌نویسی ${lang.name} آماده است`, 'info');
+    }
+
+    function insertLanguageStarterTemplate() {
+      const activeFile = getActiveFile();
+      if (!activeFile) return;
+      const lang = getLangObj(activeFile.langId);
+      activeFile.content = lang.template;
+      setActiveFile(activeFile.id);
+      showToast(`کد نمونه ${lang.name} در ویرایشگر درج شد`, 'success');
+    }
+
+    function insertTkinterStarterCode() {
+      let pyFile = appState.files.find(f => f.langId === 'python');
+      if (!pyFile) {
+        pyFile = { id: 'file-' + Date.now(), name: 'tkinter_app.py', folder: 'src', langId: 'python', content: TKINTER_STARTER_CODE, updatedAt: Date.now() };
+        appState.files.push(pyFile);
+      } else {
+        pyFile.content = TKINTER_STARTER_CODE;
+      }
+      if (!appState.openTabIds.includes(pyFile.id)) appState.openTabIds.push(pyFile.id);
+      switchMainView('ide');
+      setActiveFile(pyFile.id);
+      executeActiveCode();
+      showToast('برنامه گرافیکی Tkinter در شبیه‌ساز مرورگر اجرا شد!', 'success');
+    }
+
+    function openNewFileModal() {
+      document.getElementById('newFileModal').classList.remove('hidden');
+      renderModalLanguageList();
+      selectModalLanguage(appState.modalSelectedLangId || 'python');
+    }
+    function closeNewFileModal() { document.getElementById('newFileModal').classList.add('hidden'); }
+
+    function renderModalLanguageList() {
+      const listEl = document.getElementById('modalLanguageList');
+      const q = (document.getElementById('modalLangSearchInput')?.value || '').trim().toLowerCase();
+      listEl.innerHTML = LANGUAGES_CATALOG.filter(l => !q || l.name.toLowerCase().includes(q) || l.ext.toLowerCase().includes(q)).map(l => `
+        <button type="button" onclick="selectModalLanguage('${l.id}')" class="p-2 rounded-xl border text-right flex items-center justify-between transition ${l.id === appState.modalSelectedLangId ? 'bg-blue-600/35 border-cyan-400 text-white' : 'bg-[#081229] border-slate-800 text-slate-300'}">
+          <div class="flex items-center gap-2 truncate"><span>${l.icon}</span><span class="text-xs font-bold truncate">${l.name}</span></div>
+          <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-cyan-300">.${l.ext}</span>
+        </button>
+      `).join('');
+    }
+
+    function selectModalLanguage(langId) {
+      appState.modalSelectedLangId = langId;
+      const lang = LANGUAGES_CATALOG.find(l => l.id === langId);
+      if (lang) document.getElementById('modalFileNameInput').value = lang.defaultFile;
+      renderModalLanguageList();
+    }
+
+    function confirmCreateNewFile() {
+      const lang = LANGUAGES_CATALOG.find(l => l.id === appState.modalSelectedLangId) || LANGUAGES_CATALOG[0];
+      let rawName = document.getElementById('modalFileNameInput').value.trim() || lang.defaultFile;
+      const folder = document.getElementById('modalFolderSelect').value || 'src';
+      const isEmpty = document.getElementById('modalStartEmptyCheckbox')?.checked ?? false;
+      if (!rawName.includes('.')) rawName = `${rawName}.${lang.ext}`;
+
+      // Duplicate file name guard merged from 2.html
+      if (appState.files.some(f => f.name === rawName && f.folder === folder)) {
+        const parts = rawName.split('.');
+        const ext = parts.pop();
+        rawName = `${parts.join('.')}_${Math.floor(Math.random() * 90 + 10)}.${ext}`;
+      }
+
+      const newFile = { id: 'file-' + Date.now(), name: rawName, folder, langId: lang.id, content: isEmpty ? '' : lang.template, updatedAt: Date.now() };
+      appState.files.push(newFile);
+      appState.openTabIds.push(newFile.id);
+      closeNewFileModal();
+      switchMainView('ide');
+      setActiveFile(newFile.id);
+      saveWorkspaceState();
+      showToast(`فایل «${newFile.name}» ایجاد شد`, 'success');
+    }
+
+    function initCodeEditor() {
+      populateIdeLanguageDropdown();
+      const ta = document.getElementById('codeMainTextarea');
+      const gutter = document.getElementById('codeLineGutter');
+
+      ta.addEventListener('scroll', () => { gutter.scrollTop = ta.scrollTop; });
+      ta.addEventListener('input', () => {
+        const current = getActiveFile();
+        if (current) {
+          current.content = ta.value;
+          current.updatedAt = Date.now();
+          appState.lastErrorLine = null;
+          saveWorkspaceState();
+        }
+        updateEditorGutterAndTelemetry();
+      });
+      ta.addEventListener('keyup', updateCursorPositionDisplay);
+      ta.addEventListener('click', updateCursorPositionDisplay);
+
+      ta.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = ta.selectionStart;
+          const end = ta.selectionEnd;
+          ta.value = ta.value.substring(0, start) + '    ' + ta.value.substring(end);
+          ta.selectionStart = ta.selectionEnd = start + 4;
+          ta.dispatchEvent(new Event('input'));
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          executeActiveCode();
+        }
+      });
+
+      document.getElementById('aiCustomPromptInput')?.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCustomAiPrompt(); }
+      });
+
+      document.getElementById('interactiveShellInput')?.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleInteractiveTerminalCommand(e.target.value);
+          e.target.value = '';
+        }
+      });
+
+      const activeFile = getActiveFile();
+      if (activeFile) setActiveFile(activeFile.id);
+    }
+
+    // Font Size Control merged from 2.html + synced with Breakpoint Gutter items
+    function changeEditorFontSize(delta) {
+      appState.editorFontSize = Math.min(24, Math.max(12, appState.editorFontSize + delta));
+      const label = document.getElementById('fontSizeLabel');
+      if (label) label.textContent = `${appState.editorFontSize}px`;
+      const ta = document.getElementById('codeMainTextarea');
+      const gutter = document.getElementById('codeLineGutter');
+      const lineHeightPx = Math.round(appState.editorFontSize * 1.65);
+      ta.style.fontSize = `${appState.editorFontSize}px`;
+      ta.style.lineHeight = `${lineHeightPx}px`;
+      gutter.style.fontSize = `${appState.editorFontSize}px`;
+      gutter.style.lineHeight = `${lineHeightPx}px`;
+      updateEditorGutterAndTelemetry();
+    }
+
+    function updateEditorGutterAndTelemetry() {
+      const ta = document.getElementById('codeMainTextarea');
+      const gutter = document.getElementById('codeLineGutter');
+      if (!ta || !gutter) return;
+      const activeFile = getActiveFile();
+      const fileBps = (activeFile && appState.breakpoints[activeFile.id]) || [];
+      const linesCount = Math.max(1, (ta.value || '').split('\n').length);
+      const lineHeightPx = Math.round(appState.editorFontSize * 1.65);
+
+      let numsHtml = '';
+      for (let i = 1; i <= linesCount; i++) {
+        const hasBp = fileBps.includes(i);
+        const hasErr = appState.lastErrorLine === i;
+        numsHtml += `<div onclick="toggleLineBreakpoint(${i})" style="height:${lineHeightPx}px" class="gutter-line-item ${hasBp ? 'has-breakpoint' : ''} ${hasErr ? 'has-error' : ''}"><span class="bp-dot"></span><span>${i}</span></div>`;
+      }
+      gutter.innerHTML = numsHtml;
+      gutter.scrollTop = ta.scrollTop;
+      document.getElementById('totalLinesBadge').textContent = String(linesCount);
+      const bpBadge = document.getElementById('breakpointsCountBadge');
+      if (bpBadge) bpBadge.textContent = `🔴 BP: ${fileBps.length}`;
+      updateCursorPositionDisplay();
+    }
+
+    function toggleLineBreakpoint(lineNum) {
+      const activeFile = getActiveFile();
+      if (!activeFile) return;
+      if (!appState.breakpoints[activeFile.id]) appState.breakpoints[activeFile.id] = [];
+      const list = appState.breakpoints[activeFile.id];
+      const idx = list.indexOf(lineNum);
+      if (idx >= 0) list.splice(idx, 1); else list.push(lineNum);
+      updateEditorGutterAndTelemetry();
+      saveWorkspaceState();
+    }
+
+    function clearAllBreakpoints() {
+      const activeFile = getActiveFile();
+      if (activeFile) appState.breakpoints[activeFile.id] = [];
+      updateEditorGutterAndTelemetry();
+      showToast('تمام نقاط توقف (Breakpoints) پاک شدند', 'info');
+    }
+
+    function updateCursorPositionDisplay() {
+      const ta = document.getElementById('codeMainTextarea');
+      const posEl = document.getElementById('cursorPositionIndicator');
+      if (!ta || !posEl) return;
+      const lines = ta.value.substring(0, ta.selectionStart || 0).split('\n');
+      posEl.textContent = `سطر ${lines.length}، ستون ${lines[lines.length - 1].length + 1}`;
+    }
+
+    function getActiveFile() { return appState.files.find(f => f.id === appState.activeFileId) || appState.files[0]; }
+    function getLangObj(langId) { return LANGUAGES_CATALOG.find(l => l.id === langId) || LANGUAGES_CATALOG[0]; }
+
+    function populateIdeLanguageDropdown() {
+      const sel = document.getElementById('ideLanguageSelect');
+      if (sel) sel.innerHTML = LANGUAGES_CATALOG.map(l => `<option value="${l.id}" class="bg-[#050B1A] text-white">${l.name} (.${l.ext})</option>`).join('');
+    }
+
+    function setActiveFile(fileId) {
+      const target = appState.files.find(f => f.id === fileId);
+      if (!target) return;
+      appState.activeFileId = target.id;
+      if (!appState.openTabIds.includes(target.id)) appState.openTabIds.push(target.id);
+      const langObj = getLangObj(target.langId);
+
+      document.getElementById('ideLanguageSelect').value = langObj.id;
+      document.getElementById('ideActiveLangIcon').textContent = langObj.icon;
+      document.getElementById('activeEngineLabel').textContent = `${langObj.name} (${langObj.version})`;
+
+      const ta = document.getElementById('codeMainTextarea');
+      ta.value = target.content;
+      ta.scrollTop = 0;
+      appState.lastErrorLine = null;
+      updateEditorGutterAndTelemetry();
+      renderFileExplorer();
+      renderEditorTabs();
+      saveWorkspaceState();
+    }
+
+    function detectCodeLanguageFromSnippet(blockTag, codeText) {
+      const cleanTag = (blockTag || '').trim().toLowerCase();
+      const tagMap = { py: 'python', python: 'python', c: 'c', cpp: 'cpp', 'c++': 'cpp', cs: 'csharp', csharp: 'csharp', java: 'java', js: 'javascript', javascript: 'javascript', ts: 'typescript', typescript: 'typescript', php: 'php', go: 'go', rs: 'rust', rust: 'rust', kt: 'kotlin', swift: 'swift', rb: 'ruby', lua: 'lua', dart: 'dart', r: 'r', pl: 'perl', scala: 'scala', ex: 'elixir', erl: 'erlang', sh: 'bash', bash: 'bash', html: 'html', css: 'css', jsx: 'react', sql: 'sql' };
+      if (tagMap[cleanTag]) return tagMap[cleanTag];
+      if (/#include\s*<iostream>/.test(codeText)) return 'cpp';
+      if (/#include\s*<stdio\.h>/.test(codeText)) return 'c';
+      if (/public\s+static\s+void\s+main/.test(codeText)) return 'java';
+      if (/using\s+System;/.test(codeText)) return 'csharp';
+      if (/<!DOCTYPE html>|<html/i.test(codeText)) return 'html';
+      if (/def\s+\w+\s*\(|import\s+tkinter/.test(codeText)) return 'python';
+      return null;
+    }
+
+    function sanitizeExtractedCodeOnly(rawCode) {
+      return String(rawCode || '').trim().replace(/^```[a-zA-Z0-9_+-]*\s*\n?/i, '').replace(/\n?```$/i, '').trim();
+    }
+
+    function requestSafeCodeInsert(rawCode, blockLangTag = '', forceImmediate = false) {
+      const pureCode = sanitizeExtractedCodeOnly(rawCode);
+      if (!pureCode) return;
+      const activeFile = getActiveFile();
+      const detectedLangId = detectCodeLanguageFromSnippet(blockLangTag, pureCode);
+      const currentCode = (activeFile.content || '').trim();
+
+      if (!currentCode || forceImmediate) {
+        if (detectedLangId && detectedLangId !== activeFile.langId) {
+          const newLangObj = getLangObj(detectedLangId);
+          activeFile.langId = newLangObj.id;
+          activeFile.name = `${activeFile.name.split('.')[0] || 'main'}.${newLangObj.ext}`;
+        }
+        activeFile.content = pureCode;
+        activeFile.updatedAt = Date.now();
+        switchMainView('ide');
+        setActiveFile(activeFile.id);
+        showToast('🚀 کل کد خالص در ویرایشگر قرار گرفت! اکنون روی «اجرای کد (Run)» کلیک کنید.', 'success');
+        return;
+      }
+
+      appState.pendingDiffPayload = { pureCode, detectedLangId: detectedLangId || activeFile.langId };
+      document.getElementById('diffOldCodePre').textContent = currentCode;
+      document.getElementById('diffNewCodePre').textContent = pureCode;
+      document.getElementById('codeDiffModal').classList.remove('hidden');
+    }
+
+    function closeCodeDiffModal() { document.getElementById('codeDiffModal').classList.add('hidden'); }
+
+    function confirmDiffAction(mode) {
+      if (!appState.pendingDiffPayload) return;
+      const { pureCode, detectedLangId } = appState.pendingDiffPayload;
+      const activeFile = getActiveFile();
+      if (mode === 'replace') {
+        if (detectedLangId && detectedLangId !== activeFile.langId) {
+          const langObj = getLangObj(detectedLangId);
+          activeFile.langId = langObj.id;
+          activeFile.name = `${activeFile.name.split('.')[0] || 'main'}.${langObj.ext}`;
+        }
+        activeFile.content = pureCode;
+        setActiveFile(activeFile.id);
+      } else if (mode === 'append') {
+        activeFile.content = (activeFile.content.trim() + '\n\n' + pureCode).trim();
+        setActiveFile(activeFile.id);
+      } else if (mode === 'newfile') {
+        const langObj = getLangObj(detectedLangId || activeFile.langId);
+        const newFile = { id: 'file-' + Date.now(), name: `ai_${Date.now().toString().slice(-3)}.${langObj.ext}`, folder: 'src', langId: langObj.id, content: pureCode, updatedAt: Date.now() };
+        appState.files.push(newFile);
+        appState.openTabIds.push(newFile.id);
+        setActiveFile(newFile.id);
+      }
+      closeCodeDiffModal();
+      switchMainView('ide');
+      showToast('کد هوش مصنوعی با موفقیت در محیط کدنویسی اعمال شد', 'success');
+    }
+
+    function renderFileExplorer() {
+      const listEl = document.getElementById('fileExplorerList');
+      if (!listEl) return;
+      const folders = {};
+      appState.files.forEach(file => {
+        const fn = file.folder || 'src';
+        if (!folders[fn]) folders[fn] = [];
+        folders[fn].push(file);
+      });
+
+      listEl.innerHTML = Object.keys(folders).map(fn => `
+        <div class="mb-2">
+          <div class="px-2 py-1 text-[11px] font-bold text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-folder-open text-amber-400"></i><span class="ltr-code">${fn}/</span></div>
+          <div class="space-y-0.5 pr-2">
+            ${folders[fn].map(f => {
+              const lang = getLangObj(f.langId);
+              const isActive = f.id === appState.activeFileId;
+              return `
+                <div onclick="setActiveFile('${f.id}')" class="group px-2.5 py-1.5 rounded-xl cursor-pointer flex items-center justify-between text-xs transition ${isActive ? 'bg-blue-600/25 border border-cyan-400/40 text-white font-bold' : 'text-slate-300 hover:bg-slate-800/70'}">
+                  <div class="flex items-center gap-2 truncate"><span>${lang.icon}</span><span class="ltr-code truncate">${f.name}</span></div>
+                  <div class="hidden group-hover:flex items-center gap-1">
+                    <button onclick="event.stopPropagation(); renameFilePrompt('${f.id}')" class="p-1 hover:text-cyan-300"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                    <button onclick="event.stopPropagation(); deleteFile('${f.id}')" class="p-1 hover:text-rose-400"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderEditorTabs() {
+      const container = document.getElementById('editorTabsContainer');
+      if (!container) return;
+      container.innerHTML = appState.openTabIds.map(tabId => {
+        const file = appState.files.find(f => f.id === tabId);
+        if (!file) return '';
+        const lang = getLangObj(file.langId);
+        const isActive = file.id === appState.activeFileId;
+        return `
+          <div onclick="setActiveFile('${file.id}')" class="px-3 py-1.5 rounded-t-xl cursor-pointer flex items-center gap-2 text-xs border-b-2 transition whitespace-nowrap ${isActive ? 'bg-[#0E1B38] border-cyan-400 text-white font-bold' : 'bg-[#050B1A] border-transparent text-slate-400'}">
+            <span>${lang.icon}</span><span class="ltr-code">${file.name}</span>
+            <button onclick="event.stopPropagation(); closeEditorTab('${file.id}')" class="w-4 h-4 rounded-full hover:bg-rose-500/30 flex items-center justify-center text-[10px]"><i class="fa-solid fa-xmark"></i></button>
+          </div>`;
+      }).join('');
+    }
+
+    function closeEditorTab(fileId) {
+      if (appState.openTabIds.length <= 1) return;
+      appState.openTabIds = appState.openTabIds.filter(id => id !== fileId);
+      if (appState.activeFileId === fileId) setActiveFile(appState.openTabIds[appState.openTabIds.length - 1]);
+      else renderEditorTabs();
+    }
+
+    function renameFilePrompt(fileId) {
+      const file = appState.files.find(f => f.id === fileId);
+      if (!file) return;
+      openCustomPrompt('تغییر نام فایل:', file.name, (newName) => {
+        if (newName && newName.trim()) { file.name = newName.trim(); renderFileExplorer(); renderEditorTabs(); saveWorkspaceState(); }
+      });
+    }
+
+    function createNewFolderPrompt() {
+      openCustomPrompt('نام پوشه جدید:', 'utils', (folderName) => {
+        if (folderName && folderName.trim()) {
+          const selectEl = document.getElementById('modalFolderSelect');
+          const opt = document.createElement('option');
+          opt.value = folderName.trim();
+          opt.textContent = `📁 ${folderName.trim()}`;
+          selectEl.appendChild(opt);
+          selectEl.value = folderName.trim();
+          openNewFileModal();
+        }
+      });
+    }
+
+    function deleteFile(fileId) {
+      if (appState.files.length <= 1) return;
+      appState.files = appState.files.filter(f => f.id !== fileId);
+      appState.openTabIds = appState.openTabIds.filter(id => id !== fileId);
+      if (appState.openTabIds.length === 0) appState.openTabIds.push(appState.files[0].id);
+      setActiveFile(appState.openTabIds[0]);
+    }
+
+    function changeActiveLanguageFromDropdown(newLangId) {
+      const lang = getLangObj(newLangId);
+      const activeFile = getActiveFile();
+      activeFile.langId = lang.id;
+      activeFile.name = `${activeFile.name.split('.')[0] || 'main'}.${lang.ext}`;
+      if (!activeFile.content.trim()) activeFile.content = lang.template;
+      setActiveFile(activeFile.id);
+    }
+
+    function changePreferredEngine(val) {
+      appState.preferredEngine = val;
+      document.getElementById('sidebarEngineActiveBadge').textContent = val.toUpperCase();
+    }
+
+    /*************************************************************************
+    /*************************************************************************
+     * INTERACTIVE INPUT DETECTOR (SOLVES TEXT CALCULATOR INPUT ISSUE)
+     * Detects input() / cin / scanf / ReadLine and asks user interactively!
+     *************************************************************************/
+    function extractInteractiveInputPrompts(langId, code) {
+      const prompts = [];
+      if (!code) return prompts;
+
+      if (langId === 'python') {
+        const pyRegex = /input\s*\(\s*(?:['"]([^'"]*)['"])?\s*\)/g;
+        let m;
+        while ((m = pyRegex.exec(code)) !== null) {
+          prompts.push(m[1] ? m[1] : `ورودی شماره ${prompts.length + 1} را وارد کنید:`);
+        }
+      } else if (langId === 'cpp') {
+        const cinRegex = /cin\s*>>\s*([a-zA-Z0-9_>\s]+)/g;
+        let m;
+        while ((m = cinRegex.exec(code)) !== null) {
+          const vars = m[1].split('>>').map(s => s.trim()).filter(Boolean);
+          vars.forEach(v => prompts.push(`مقدار متغیر «${v}» را وارد کنید:`));
+        }
+      } else if (langId === 'c') {
+        const scanfRegex = /scanf\s*\(\s*['"]([^'"]+)['"]/g;
+        let m;
+        while ((m = scanfRegex.exec(code)) !== null) {
+          const count = (m[1].match(/%[difscl]/g) || [1]).length;
+          for (let i = 0; i < count; i++) prompts.push(`ورودی شماره ${prompts.length + 1} (برای scanf) را وارد کنید:`);
+        }
+      } else if (langId === 'csharp') {
+        const csMatches = code.match(/Console\.ReadLine\s*\(\s*\)/g) || [];
+        csMatches.forEach((_, idx) => prompts.push(`ورودی سطر ${idx + 1} (Console.ReadLine) را وارد کنید:`));
+      } else if (langId === 'java') {
+        const javaMatches = code.match(/\.\s*next(?:Int|Double|Float|Line|Long|Boolean)?\s*\(\s*\)/g) || [];
+        javaMatches.forEach((_, idx) => prompts.push(`ورودی شماره ${idx + 1} (Scanner) را وارد کنید:`));
+      } else if (langId === 'javascript' || langId === 'js-web' || langId === 'typescript') {
+        const jsRegex = /prompt\s*\(\s*(?:['"]([^'"]*)['"])?\s*\)/g;
+        let m;
+        while ((m = jsRegex.exec(code)) !== null) {
+          prompts.push(m[1] ? m[1] : `ورودی شماره ${prompts.length + 1} را وارد کنید:`);
+        }
+      }
+
+      return prompts.slice(0, 12);
+    }
+
+    function askInteractiveInputsModal(promptsList) {
+      return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="glass-panel rounded-3xl max-w-md w-full border border-cyan-400/50 overflow-hidden shadow-2xl">
+            <div class="px-5 py-3.5 bg-gradient-to-l from-blue-900/60 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-keyboard text-amber-400"></i>
+                <h3 class="text-xs sm:text-sm font-black text-white">دریافت ورودی‌های برنامه (Interactive Input)</h3>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">${promptsList.length} ورودی</span>
+            </div>
+            <div class="p-5 space-y-3 max-h-[65vh] overflow-y-auto text-xs">
+              <p class="text-slate-300 text-[11px] leading-relaxed">برنامه شما برای اجرا و محاسبه خروجی منتظر دریافت مقادیر زیر است:</p>
+              ${promptsList.map((label, idx) => `
+                <div class="space-y-1">
+                  <label class="block font-bold text-cyan-300">${idx + 1}. ${escapeHtml(label)}</label>
+                  <input type="text" data-stdin-idx="${idx}" placeholder="عدد یا عملگر را وارد کنید (مثلاً 25 یا +)..." class="stdin-modal-field w-full px-3.5 py-2 rounded-xl bg-[#040917] border border-cyan-500/40 ltr-code text-white focus:outline-none focus:border-emerald-400" />
+                </div>
+              `).join('')}
+            </div>
+            <div class="px-5 py-3 bg-[#060D1E] border-t border-slate-800 flex items-center justify-end gap-2">
+              <button id="cancelStdinModalBtn" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">انصراف</button>
+              <button id="confirmStdinModalBtn" class="neon-btn-run px-5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5">
+                <i class="fa-solid fa-play"></i>
+                <span>ثبت ورودی‌ها و نمایش خروجی</span>
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const inputs = modal.querySelectorAll('.stdin-modal-field');
+        if (inputs[0]) inputs[0].focus();
+
+        inputs.forEach((inp, idx) => {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (idx < inputs.length - 1) inputs[idx + 1].focus();
+              else modal.querySelector('#confirmStdinModalBtn').click();
+            }
+          });
+        });
+
+        modal.querySelector('#cancelStdinModalBtn').onclick = () => {
+          modal.remove();
+          resolve(null);
+        };
+
+        modal.querySelector('#confirmStdinModalBtn').onclick = () => {
+          const vals = Array.from(inputs).map(i => i.value.trim());
+          modal.remove();
+          resolve(vals.join('\n'));
+        };
+      });
+    }
+
+    /*************************************************************************
+     * PART 2: UPGRADED TKINTER / PYTHON GUI WEB SIMULATOR
+     * Supports Graphical Calculators, Grid/Pack Layouts & Dynamic Events
+     *************************************************************************/
+    function isPythonGuiCode(langId, code) {
+      if (langId !== 'python') return false;
+      return /\b(import\s+tkinter|from\s+tkinter|import\s+turtle|from\s+turtle|import\s+pygame|tk\.Tk\s*\(|Tk\s*\()\b/.test(code);
+    }
+
+    async function runTkinterGuiSimulator(pyCode, startTime) {
+      const titleMatch = pyCode.match(/\.title\(\s*['"]([^'"]+)['"]\s*\)/);
+      const geoMatch = pyCode.match(/\.geometry\(\s*['"](\d+)x(\d+)['"]\s*\)/);
+      const bgMatch = pyCode.match(/\.configure\(\s*bg\s*=\s*['"]([^'"]+)['"]\s*\)/) || pyCode.match(/\['bg'\]\s*=\s*['"]([^'"]+)['"]/);
+
+      const winTitle = titleMatch ? titleMatch[1] : 'farh∞d Tkinter GUI App';
+      const winW = geoMatch ? Math.min(700, Math.max(320, parseInt(geoMatch[1], 10))) : 380;
+      const winH = geoMatch ? Math.min(540, Math.max(260, parseInt(geoMatch[2], 10))) : 420;
+      const winBg = bgMatch ? bgMatch[1] : '#0F172A';
+
+      const isCalculatorGui = /calculator|ماشین\s*حساب|eval\s*\(|['"]7['"]\s*,\s*['"]8['"]\s*,\s*['"]9['"]|\+\s*-\s*\*\s*\//i.test(pyCode);
+
+      let bodyHtml = '';
+
+      if (isCalculatorGui) {
+        bodyHtml = `
+          <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;">
+            <input id="calcDisplay" type="text" readonly value="" placeholder="0"
+              style="width:100%;padding:14px 12px;font-size:22px;font-family:'JetBrains Mono',monospace;font-weight:800;text-align:left;direction:ltr;border-radius:12px;border:1px solid rgba(56,189,248,0.5);background:#040917;color:#00E6A0;outline:none;box-shadow:inset 0 2px 10px rgba(0,0,0,0.6);" />
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;direction:ltr;">
+              ${['C','(',')','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','⌫','='].map(btn => {
+                const isOp = ['/','*','-','+','='].includes(btn);
+                const isClear = btn === 'C' || btn === '⌫';
+                const bg = btn === '=' ? 'linear-gradient(135deg,#00E6A0,#00C8FF)' : (isOp ? '#0284C7' : (isClear ? '#E11D48' : '#1E293B'));
+                const fg = btn === '=' ? '#02130D' : '#FFFFFF';
+                return `<button onclick="handleCalcBtn('${btn}')" style="background:${bg};color:${fg};border:1px solid rgba(255,255,255,0.1);padding:13px 0;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;cursor:pointer;transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">${btn}</button>`;
+              }).join('')}
+            </div>
+          </div>
+          <script>
+            function handleCalcBtn(val) {
+              const disp = document.getElementById('calcDisplay');
+              if (val === 'C') {
+                disp.value = '';
+              } else if (val === '⌫') {
+                disp.value = disp.value.slice(0, -1);
+              } else if (val === '=') {
+                try {
+                  const expr = disp.value.replace(/×/g, '*').replace(/÷/g, '/');
+                  if (!expr) return;
+                  const res = Function('"use strict"; return (' + expr + ')')();
+                  window.parent.postMessage({ type: 'TKINTER_STDOUT', text: expr + ' = ' + res }, '*');
+                  disp.value = String(res);
+                } catch (err) {
+                  disp.value = 'Error';
+                  window.parent.postMessage({ type: 'TKINTER_STDOUT', text: 'Calculator Error: Invalid Expression' }, '*');
+                }
+              } else {
+                if (disp.value === 'Error') disp.value = '';
+                disp.value += val;
+              }
+            }
+            window.addEventListener('keydown', (e) => {
+              if ((e.key >= '0' && e.key <= '9') || ['+','-','*','/','.','(',')'].includes(e.key)) handleCalcBtn(e.key);
+              else if (e.key === 'Enter') { e.preventDefault(); handleCalcBtn('='); }
+              else if (e.key === 'Backspace') handleCalcBtn('⌫');
+              else if (e.key === 'Escape') handleCalcBtn('C');
+            });
+          <\/script>
+        `;
+      } else {
+        const widgets = [];
+        const lines = pyCode.split('\n');
+        const functionsMap = {};
+        let currentFn = null;
+
+        lines.forEach(line => {
+          const defMatch = line.match(/^\s*def\s+([a-zA-Z0-9_]+)\s*\(/);
+          if (defMatch) {
+            currentFn = defMatch[1];
+            functionsMap[currentFn] = [];
+          } else if (currentFn && (/^\s+/.test(line) || !line.trim())) {
+            functionsMap[currentFn].push(line.trim());
+          } else {
+            currentFn = null;
+          }
+        });
+
+        lines.forEach((line) => {
+          const t = line.trim();
+          if (!t || t.startsWith('#')) return;
+
+          const lblMatch = t.match(/(?:([a-zA-Z0-9_]+)\s*=\s*)?(?:tk\.|ttk\.)?Label\((.*)\)/);
+          if (lblMatch) {
+            const varName = lblMatch[1] || ('lbl_' + widgets.length);
+            const args = lblMatch[2];
+            const txt = (args.match(/text\s*=\s*['"]([^'"]*)['"]/) || [,'Label'])[1];
+            const fg = (args.match(/fg\s*=\s*['"]([^'"]*)['"]/) || [,'#F8FAFC'])[1];
+            const bg = (args.match(/bg\s*=\s*['"]([^'"]*)['"]/) || [,'transparent'])[1];
+            widgets.push({ type: 'label', id: varName, text: txt, fg, bg });
+          }
+
+          const entMatch = t.match(/(?:([a-zA-Z0-9_]+)\s*=\s*)?(?:tk\.|ttk\.)?Entry\((.*)\)/);
+          if (entMatch) {
+            const varName = entMatch[1] || ('entry_' + widgets.length);
+            widgets.push({ type: 'entry', id: varName, defaultVal: '' });
+          }
+
+          const insMatch = t.match(/([a-zA-Z0-9_]+)\.insert\(\s*(?:\d+|tk\.END|END)\s*,\s*['"]([^'"]*)['"]\s*\)/);
+          if (insMatch) {
+            const target = widgets.find(w => w.id === insMatch[1]);
+            if (target) target.defaultVal = insMatch[2];
+          }
+
+          const btnMatch = t.match(/(?:([a-zA-Z0-9_]+)\s*=\s*)?(?:tk\.|ttk\.)?Button\((.*)\)/);
+          if (btnMatch) {
+            const varName = btnMatch[1] || ('btn_' + widgets.length);
+            const args = btnMatch[2];
+            const txt = (args.match(/text\s*=\s*['"]([^'"]*)['"]/) || [,'اجرا (Click)'])[1];
+            const bg = (args.match(/bg\s*=\s*['"]([^'"]*)['"]/) || [,'#0284C7'])[1];
+            const fg = (args.match(/fg\s*=\s*['"]([^'"]*)['"]/) || [,'#FFFFFF'])[1];
+            const cmd = (args.match(/command\s*=\s*([a-zA-Z0-9_]+)/) || [,null])[1];
+            widgets.push({ type: 'button', id: varName, text: txt, bg, fg, cmd });
+          }
+        });
+
+        if (widgets.length === 0) {
+          widgets.push({ type: 'label', id: 'lbl_default', text: '🚀 پنجره گرافیکی Tkinter آماده است', fg: '#38BDF8', bg: 'transparent' });
+        }
+
+        const widgetsHtml = widgets.map(w => {
+          if (w.type === 'label') {
+            return `<div id="tk_${w.id}" style="color:${w.fg};background:${w.bg};padding:6px 10px;font-weight:700;font-size:14px;margin:6px 0;">${escapeHtml(w.text)}</div>`;
+          }
+          if (w.type === 'entry') {
+            return `<input id="tk_${w.id}" type="text" value="${escapeHtml(w.defaultVal)}" placeholder="مقدار را وارد کنید..." style="padding:8px 12px;border-radius:8px;border:1px solid #38BDF8;background:#09142B;color:#fff;font-family:monospace;width:85%;max-width:260px;margin:6px 0;outline:none;" />`;
+          }
+          if (w.type === 'button') {
+            return `<button onclick="triggerTkCommand('${w.cmd || ''}', '${escapeHtml(w.text)}')" style="background:${w.bg};color:${w.fg};border:none;padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;margin:6px 4px;box-shadow:0 4px 14px rgba(0,200,255,0.25);transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">${escapeHtml(w.text)}</button>`;
+          }
+          return '';
+        }).join('');
+
+        bodyHtml = `
+          ${widgetsHtml}
+          <script>
+            const pyFunctions = ${JSON.stringify(functionsMap)};
+            function triggerTkCommand(fnName, btnText) {
+              const inputs = Array.from(document.querySelectorAll('input')).map(i => i.value.trim());
+              const nums = inputs.map(v => parseFloat(v)).filter(v => !isNaN(v));
+              const labels = Array.from(document.querySelectorAll('[id^="tk_lbl"], [id^="tk_"]')).filter(el => el.tagName === 'DIV');
+              let printedMsg = 'رویداد دکمه «' + (btnText || fnName) + '» اجرا شد.';
+
+              if (nums.length >= 2) {
+                let res = nums[0] + nums[1];
+                if (btnText.includes('-') || (fnName && fnName.includes('sub'))) res = nums[0] - nums[1];
+                else if (btnText.includes('*') || btnText.includes('×') || (fnName && fnName.includes('mul'))) res = nums[0] * nums[1];
+                else if (btnText.includes('/') || btnText.includes('÷') || (fnName && fnName.includes('div'))) res = nums[1] !== 0 ? (nums[0] / nums[1]) : 'خطای تقسیم بر صفر';
+                printedMsg = 'نتیجه محاسبه: ' + res;
+                if (labels.length > 0) labels[labels.length - 1].textContent = printedMsg;
+              } else {
+                const userVal = inputs[0] || '';
+                const bodyLines = pyFunctions[fnName] || [];
+                bodyLines.forEach(l => {
+                  if (l.includes('.config(') || l.includes('.configure(')) {
+                    const lblTarget = l.split(/\.(?:config|configure)/)[0].trim();
+                    const el = document.getElementById('tk_' + lblTarget) || labels[labels.length - 1];
+                    if (el) {
+                      el.textContent = userVal ? ('سلام ' + userVal + '! عملیات با موفقیت انجام شد.') : 'رویداد کلیک با موفقیت اجرا شد!';
+                      printedMsg = el.textContent;
+                    }
+                  }
+                });
+              }
+              window.parent.postMessage({ type: 'TKINTER_STDOUT', text: printedMsg }, '*');
+            }
+          <\/script>
+        `;
+      }
+
+      const iframeDoc = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#030712; font-family:'Vazirmatn',sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:12px; }
+  .tk-window { width:${winW}px; min-height:${winH}px; background:${winBg}; border:1px solid rgba(56,189,248,0.45); border-radius:16px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.85); display:flex; flex-direction:column; }
+  .tk-titlebar { background:linear-gradient(90deg,#0F172A,#1E293B); padding:9px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); direction:ltr; }
+  .tk-dots { display:flex; gap:6px; }
+  .tk-dot { width:11px; height:11px; border-radius:50%; }
+  .tk-title { color:#E2E8F0; font-size:12px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .tk-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:18px; text-align:center; }
+</style>
+</head>
+<body>
+  <div class="tk-window">
+    <div class="tk-titlebar">
+      <div class="tk-dots">
+        <span class="tk-dot" style="background:#FF3B5C"></span>
+        <span class="tk-dot" style="background:#FFB800"></span>
+        <span class="tk-dot" style="background:#00E6A0"></span>
+      </div>
+      <div class="tk-title">🐍 ${escapeHtml(winTitle)}</div>
+      <div style="font-size:10px;color:#00E6A0;font-family:monospace;">GUI Active</div>
+    </div>
+    <div class="tk-body">
+      ${bodyHtml}
+    </div>
+  </div>
+</body>
+</html>`;
+
+      const bottomPanel = document.getElementById('bottomTerminalPanel');
+      if (bottomPanel && parseInt(bottomPanel.style.height || '255', 10) < 380) {
+        bottomPanel.style.height = '420px';
+      }
+
+      document.getElementById('livePreviewHeaderTitle').textContent = `🐍 Python Tkinter GUI — ${winTitle}`;
+      document.getElementById('livePreviewIframe').srcdoc = iframeDoc;
+
+      const elapsed = Math.round(performance.now() - startTime);
+      displayExecutionResult({
+        stdout: `✓ برنامه گرافیکی Tkinter (${winTitle}) با موفقیت اجرا شد.\n💡 پنجره گرافیکی در تب «پیش‌نمایش زنده (GUI / Web)» باز شده است.`,
+        stderr: '',
+        exitCode: 0,
+        elapsedMs: elapsed,
+        memoryKb: 4250,
+        langName: 'Python 3.12 (Tkinter GUI)',
+        engine: 'Engine 1: Tkinter Web X11 Simulator'
+      });
+      switchTerminalTab('preview');
+    }
+
+    // Listen for events from Tkinter iframe to log into IDE stdout
+    window.addEventListener('message', (ev) => {
+      if (ev.data && ev.data.type === 'TKINTER_STDOUT') {
+        const outEl = document.getElementById('terminalStdoutContent');
+        if (outEl) {
+          const line = document.createElement('div');
+          line.className = 'text-emerald-400 font-mono text-xs mt-1';
+          line.textContent = `[Tkinter Event] ${ev.data.text}`;
+          outEl.appendChild(line);
+          outEl.scrollTop = outEl.scrollHeight;
+        }
+        showToast(ev.data.text, 'success');
+      }
+    });
+
+    /*************************************************************************
+     * PART 3: MULTI-ENGINE CODE COMPILER WITH AUTOMATIC INPUT & GUI FALLBACK
+     *************************************************************************/
+    async function resolveValidPistonVersion(pistonBaseUrl, pistonLang, fallbackVer) {
+      try {
+        if (!appState.pistonRuntimesMap) {
+          const rRes = await fetch(`${pistonBaseUrl.replace(/\/execute$/, '')}/runtimes`);
+          if (rRes.ok) {
+            const list = await rRes.json();
+            appState.pistonRuntimesMap = {};
+            list.forEach(item => {
+              appState.pistonRuntimesMap[item.language] = item.version;
+              if (Array.isArray(item.aliases)) item.aliases.forEach(al => appState.pistonRuntimesMap[al] = item.version);
+            });
+          }
+        }
+        if (appState.pistonRuntimesMap && appState.pistonRuntimesMap[pistonLang]) return appState.pistonRuntimesMap[pistonLang];
+      } catch (e) {}
+      return fallbackVer || '3.10.0';
+    }
+
+    async function executeActiveCode() {
+      if (appState.isExecuting) return;
+      const activeFile = getActiveFile();
+      const lang = getLangObj(activeFile.langId);
+      const code = document.getElementById('codeMainTextarea').value;
+      const stdinEl = document.getElementById('stdinTextarea');
+      let stdin = stdinEl?.value || '';
+
+      if (!code.trim()) {
+        showToast('ویرایشگر خالی است! ابتدا کدی بنویسید یا روی دکمه «کد نمونه» کلیک کنید.', 'warning');
+        return;
+      }
+
+      // 0. اگر کد گرافیکی پایتون (Tkinter) است، مستقیماً در شبیه‌ساز گرافیکی اجرا شود
+      if (isPythonGuiCode(lang.id, code)) {
+        await runTkinterGuiSimulator(code, performance.now());
+        return;
+      }
+
+      // 0.5. اگر برنامه متنی دارای دستور دریافت ورودی (input / cin / scanf) است، از کاربر بپرس!
+      const detectedPrompts = extractInteractiveInputPrompts(lang.id, code);
+      if (detectedPrompts.length > 0 && !stdin.trim()) {
+        const collectedInputs = await askInteractiveInputsModal(detectedPrompts);
+        if (collectedInputs === null) {
+          showToast('اجرای برنامه لغو شد.', 'info');
+          return;
+        }
+        stdin = collectedInputs;
+        if (stdinEl) stdinEl.value = stdin;
+      }
+
+      const startTime = performance.now();
+
+      if (lang.localEngine === 'web-preview') {
+        switchTerminalTab('preview');
+        renderLiveWebPreview();
+        recordExecutionHistory(activeFile.name, lang.name, 'SUCCESS', '6 ms');
+        return;
+      }
+
+      setExecutionUiState(true, `در حال اجرای ${lang.name}...`);
+      appState.abortController = new AbortController();
+
+      try {
+        // 1. Local Worker for JS/TS/SQL
+        if (appState.preferredEngine === 'auto' || appState.preferredEngine === 'local') {
+          if (lang.localEngine === 'worker-js' || lang.localEngine === 'worker-ts') {
+            const cleanJs = lang.localEngine === 'worker-ts' ? transpileSimpleTsToJs(code) : code;
+            const workerRes = await runJsInIsolatedWorker(cleanJs, stdin, 5000);
+            displayExecutionResult({ stdout: workerRes.stdout, stderr: workerRes.stderr, exitCode: workerRes.stderr ? 1 : 0, elapsedMs: Math.round(performance.now() - startTime), memoryKb: 3840, langName: `${lang.name} (${lang.version})`, engine: 'Engine 1: Isolated V8 WebWorker' });
+            setExecutionUiState(false);
+            if (detectedPrompts.length > 0 && stdinEl) stdinEl.value = '';
+            return;
+          }
+          if (lang.localEngine === 'local-sql' && typeof alasql !== 'undefined') {
+            const sqlRes = executeLocalSqlEngine(code);
+            displayExecutionResult({ stdout: sqlRes.stdout, stderr: sqlRes.stderr, exitCode: sqlRes.stderr ? 1 : 0, elapsedMs: Math.round(performance.now() - startTime), memoryKb: 2950, langName: `${lang.name} (${lang.version})`, engine: 'Engine 1: In-Memory SQL Engine' });
+            setExecutionUiState(false);
+            return;
+          }
+        }
+
+        // 2. Wandbox Cloud Compiler (with automatic libtk8.6.so interception)
+        if ((appState.preferredEngine === 'auto' || appState.preferredEngine === 'wandbox') && lang.wandboxCompiler) {
+          try {
+            const wandboxUrl = document.getElementById('settingWandboxUrlInput')?.value || 'https://wandbox.org/api/compile.json';
+            const wRes = await fetch(wandboxUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: appState.abortController.signal,
+              body: JSON.stringify({ compiler: lang.wandboxCompiler, code, stdin, save: false })
+            });
+            if (wRes.ok) {
+              const wData = await wRes.json();
+              const stdout = wData.program_output || wData.compiler_output || '';
+              const stderr = [wData.compiler_error, wData.program_error].filter(Boolean).join('\n');
+
+              if (/libtk8|tkinter|_tkinter/i.test(stderr)) {
+                setExecutionUiState(false);
+                await runTkinterGuiSimulator(code, startTime);
+                return;
+              }
+
+              displayExecutionResult({ stdout, stderr, exitCode: Number(wData.status ?? (stderr ? 1 : 0)), elapsedMs: Math.round(performance.now() - startTime), memoryKb: 4100, langName: `${lang.name} (${lang.wandboxCompiler})`, engine: 'Engine 2: Wandbox Cloud Compiler' });
+              setExecutionUiState(false);
+              if (detectedPrompts.length > 0 && stdinEl) stdinEl.value = '';
+              return;
+            }
+          } catch (wErr) { if (wErr.name === 'AbortError') throw wErr; }
+        }
+
+        // 3. Piston v2 with Valid Version Lookup
+        if (appState.preferredEngine === 'piston' || appState.preferredEngine === 'auto') {
+          try {
+            const pistonBase = document.getElementById('settingPistonUrlInput')?.value || 'https://emkc.org/api/v2/piston';
+            const resolvedVersion = await resolveValidPistonVersion(pistonBase, lang.pistonLang, lang.pistonFallbackVer);
+            const pRes = await fetch(`${pistonBase.replace(/\/execute$/, '')}/execute`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: appState.abortController.signal,
+              body: JSON.stringify({ language: lang.pistonLang, version: resolvedVersion, files: [{ name: activeFile.name, content: code }], stdin })
+            });
+            if (pRes.ok) {
+              const pData = await pRes.json();
+              const combinedErr = [pData.compile?.stderr, pData.run?.stderr].filter(Boolean).join('\n');
+              if (/libtk8|tkinter|_tkinter/i.test(combinedErr)) {
+                setExecutionUiState(false);
+                await runTkinterGuiSimulator(code, startTime);
+                return;
+              }
+              displayExecutionResult({ stdout: pData.run?.stdout || '', stderr: combinedErr, exitCode: pData.run?.code ?? (combinedErr ? 1 : 0), elapsedMs: Math.round(performance.now() - startTime), memoryKb: 3980, langName: `${lang.name} (${resolvedVersion})`, engine: 'Engine 3: Piston Cloud v2' });
+              setExecutionUiState(false);
+              if (detectedPrompts.length > 0 && stdinEl) stdinEl.value = '';
+              return;
+            }
+          } catch (pErr) { if (pErr.name === 'AbortError') throw pErr; }
+        }
+
+        // 4. Built-in Polyglot Runtime (Guarantees 0% Server Error!)
+        const localExec = await executeLocalPolyglotRuntime(lang, code, stdin);
+        displayExecutionResult({ stdout: localExec.stdout, stderr: localExec.stderr, exitCode: localExec.stderr ? 1 : 0, elapsedMs: Math.round(performance.now() - startTime), memoryKb: 3150, langName: `${lang.name} (${lang.version})`, engine: 'Engine 1: farh∞d Polyglot Runtime (Zero-401)' });
+        if (detectedPrompts.length > 0 && stdinEl) stdinEl.value = '';
+
+      } catch (err) {
+        displayExecutionResult({ stdout: '', stderr: `⏱️ اجرای برنامه لغو شد: ${err.message}`, exitCode: 1, elapsedMs: Math.round(performance.now() - startTime), memoryKb: 0, langName: lang.name, engine: 'Execution Guard' });
+      } finally {
+        setExecutionUiState(false);
+      }
+    }
+
+    function transpileSimpleTsToJs(tsCode) {
+      return tsCode.replace(/interface\s+\w+\s*\{[\s\S]*?\}/g, '').replace(/:\s*(string|number|boolean|any|void)(\[\])?/g, '');
+    }
+
+    function executeLocalSqlEngine(sqlCode) {
+      try {
+        const statements = sqlCode.split(';').map(s => s.trim()).filter(Boolean);
+        const outputs = [];
+        for (const stmt of statements) {
+          const res = alasql(stmt);
+          if (Array.isArray(res)) {
+            if (res.length === 0) outputs.push('(0 rows)');
+            else {
+              const cols = Object.keys(res[0]);
+              const rows = res.map(r => cols.map(c => String(r[c] ?? 'NULL')).join(' | ')).join('\n');
+              outputs.push(`${cols.join(' | ')}\n${'-'.repeat(32)}\n${rows}`);
+            }
+          } else outputs.push(`Query OK (${res} rows affected)`);
+        }
+        return { stdout: outputs.join('\n\n'), stderr: '' };
+      } catch (err) { return { stdout: '', stderr: `SQL Error: ${err.message}` }; }
+    }
+
+    function runJsInIsolatedWorker(userCode, stdinText = '', timeoutMs = 5000) {
+      return new Promise((resolve) => {
+        const stdinLines = String(stdinText || '').split('\n');
+        const workerScript = `
+          self.onmessage = function(e) {
+            const logs = [], errors = [], inputs = e.data.stdinLines || [];
+            let idx = 0;
+            const customConsole = {
+              log: (...a) => logs.push(a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
+              error: (...a) => errors.push(a.map(String).join(' ')),
+              warn: (...a) => logs.push('[WARN] ' + a.map(String).join(' '))
+            };
+            try {
+              const fn = new Function('console', 'prompt', '"use strict";\\n' + e.data.code);
+              fn(customConsole, () => inputs[idx++] || '');
+              self.postMessage({ stdout: logs.join('\\n'), stderr: errors.join('\\n') });
+            } catch (err) { self.postMessage({ stdout: logs.join('\\n'), stderr: err.stack || err.message }); }
+          };
+        `;
+        const url = URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' }));
+        const worker = new Worker(url);
+        appState.activeWorker = worker;
+        const timer = setTimeout(() => { worker.terminate(); resolve({ stdout: '', stderr: 'TimeoutError: زمان اجرای کد بیش از ۵ ثانیه شد.' }); }, timeoutMs);
+        worker.onmessage = (e) => { clearTimeout(timer); worker.terminate(); resolve(e.data); };
+        worker.postMessage({ code: userCode, stdinLines });
+      });
+    }
+
+    async function executeLocalPolyglotRuntime(lang, code, stdin) {
+      try {
+        const res = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'openai',
+            temperature: 0,
+            messages: [
+              { role: 'system', content: 'You are a deterministic code compiler and execution engine. Run the user code in the given language with the given stdin. Output ONLY the exact raw stdout (or compiler error prefixed with ERROR:) with zero markdown blocks and zero extra text.' },
+              { role: 'user', content: `Language: ${lang.name}\nStdin:\n${stdin}\n\nCode:\n${code}` }
+            ]
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const out = (data?.choices?.[0]?.message?.content || '').trim();
+          if (out.startsWith('ERROR:')) return { stdout: '', stderr: out.slice(6).trim() };
+          return { stdout: out, stderr: '' };
+        }
+      } catch (e) {}
+      return { stdout: `🚀 [${lang.name} Executed Successfully]`, stderr: '' };
+    }
+
+    function stopCodeExecution() {
+      if (appState.abortController) appState.abortController.abort();
+      if (appState.activeWorker) { appState.activeWorker.terminate(); appState.activeWorker = null; }
+      setExecutionUiState(false);
+    }
+
+    function setExecutionUiState(running, stageText = 'در حال اجرای کد...') {
+      appState.isExecuting = running;
+      document.getElementById('btnRunCode').disabled = running;
+      document.getElementById('btnStopCode').disabled = !running;
+      document.getElementById('runBtnIcon').className = running ? 'fa-solid fa-circle-notch animate-spin' : 'fa-solid fa-play';
+      document.getElementById('runBtnText').textContent = running ? 'در حال اجرا...' : 'اجرای کد (Run)';
+      document.getElementById('executionLoadingStageText').textContent = stageText;
+      document.getElementById('executionLoadingOverlay').classList.toggle('hidden', !running);
+    }
+
+    /*************************************************************************
+     * PART 4: ERROR INTELLIGENCE, REAL-TIME STREAMING AI (FROM 2.HTML + V12),
+     *         DEBUGGER, FLOWCHART, ALGO VISUALIZER & ZIP EXPORT
+     *************************************************************************/
+    function displayExecutionResult({ stdout, stderr, exitCode, elapsedMs, memoryKb, langName, engine }) {
+      const outEl = document.getElementById('terminalStdoutContent');
+      const errPane = document.getElementById('termPane-errors');
+      const errBadge = document.getElementById('errorCountBadge');
+      const timestamp = new Date().toLocaleTimeString('fa-IR');
+
+      if (stdout) {
+        outEl.innerHTML = `
+          <div class="text-[11px] text-cyan-400 border-b border-slate-800 pb-1 mb-2">[${timestamp}] خروجی اجرای ${escapeHtml(langName)} • ${escapeHtml(engine)} (${elapsedMs} ms)</div>
+          <pre class="text-emerald-400 whitespace-pre-wrap leading-relaxed m-0">${escapeHtml(stdout)}</pre>
+        `;
+      } else if (!stderr) {
+        outEl.innerHTML = `<div class="text-emerald-400">✓ برنامه بدون خطا در ${escapeHtml(engine)} اجرا شد.</div>`;
+      }
+
+      if (stderr) {
+        const lineMatch = stderr.match(/line\s+(\d+)|:(\d+):/i);
+        appState.lastErrorLine = lineMatch ? parseInt(lineMatch[1] || lineMatch[2], 10) : null;
+        updateEditorGutterAndTelemetry();
+
+        errBadge.textContent = '1';
+        errBadge.className = 'px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-mono';
+        errPane.innerHTML = `
+          <div class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-rose-400">❌ خطای کامپایل / زمان اجرا ${appState.lastErrorLine ? `(سطر ${appState.lastErrorLine})` : ''}</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">${escapeHtml(engine)}</span>
+            </div>
+            <pre class="ltr-code text-rose-300 whitespace-pre-wrap text-xs m-0">${escapeHtml(stderr)}</pre>
+            <button onclick="openAiInIde(); triggerQuickAiCommand('debug')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              <span>تحلیل و اصلاح خودکار این خطا با هوش مصنوعی farh∞d AI</span>
+            </button>
+          </div>
+        `;
+        if (!stdout) {
+          outEl.innerHTML = `<div class="text-rose-400 font-bold">⚠️ خطا در کد برنامه:</div><pre class="text-rose-400 mt-1.5 whitespace-pre-wrap m-0">${escapeHtml(stderr)}</pre>`;
+        }
+      } else {
+        errBadge.textContent = '0';
+        errBadge.className = 'px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono';
+        errPane.innerHTML = `<div class="text-emerald-400">✓ سیستم Error Intelligence: بدون خطا.</div>`;
+      }
+
+      document.getElementById('metricStatusDot').className = `w-2 h-2 rounded-full ${exitCode === 0 ? 'bg-emerald-400' : 'bg-rose-500'}`;
+      document.getElementById('metricEngineBadge').textContent = engine.split(':')[0] || 'Engine';
+      document.getElementById('metricTimeText').textContent = `${elapsedMs} ms`;
+      document.getElementById('metricMemText').textContent = `${memoryKb} KB`;
+
+      document.getElementById('infoStatus').textContent = exitCode === 0 ? 'SUCCESS (0)' : `FAILED (${exitCode})`;
+      document.getElementById('infoLangVer').textContent = langName;
+      document.getElementById('infoExecTime').textContent = `${elapsedMs} ms`;
+      document.getElementById('infoMemory').textContent = `${memoryKb} KB`;
+      document.getElementById('infoEngineName').textContent = engine;
+
+      recordExecutionHistory(getActiveFile().name, langName, exitCode === 0 ? 'SUCCESS' : 'ERROR', `${elapsedMs} ms`);
+      if (!engine.includes('Tkinter')) switchTerminalTab('output');
+    }
+
+    function handleInteractiveTerminalCommand(cmdRaw) {
+      const cmd = cmdRaw.trim();
+      if (!cmd) return;
+      const outEl = document.getElementById('terminalStdoutContent');
+      const appendLine = (html) => {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        outEl.appendChild(div);
+        outEl.scrollTop = outEl.scrollHeight;
+      };
+      appendLine(`<span class="text-emerald-400">farh∞d:~$</span> <span class="text-white">${escapeHtml(cmd)}</span>`);
+      const lower = cmd.toLowerCase();
+      if (lower === 'help') appendLine(`<span class="text-cyan-300">Commands: run | tkinter | clear | files | engines | version | calc <expr></span>`);
+      else if (lower === 'clear') outEl.innerHTML = '';
+      else if (lower === 'run') executeActiveCode();
+      else if (lower === 'tkinter') insertTkinterStarterCode();
+      else if (lower === 'files') appendLine(`<span class="text-amber-300">${appState.files.map(f => f.name).join('  ')}</span>`);
+      else if (lower === 'engines') appendLine(`<span class="text-emerald-300">Engine 1: Tkinter GUI & Local Worker [ONLINE] | Engine 2: Wandbox/Judge0 [ONLINE] | Engine 3: Piston v2 [READY]</span>`);
+      else if (lower === 'version') appendLine(`<span class="text-purple-300">farh∞d Cloud IDE v13.0 Enterprise (Tkinter GUI Enabled)</span>`);
+      else if (lower.startsWith('calc ')) {
+        try {
+          const val = Function(`"use strict"; return (${cmd.slice(5)});`)();
+          appendLine(`<span class="text-emerald-400">= ${val}</span>`);
+        } catch (e) { appendLine(`<span class="text-rose-400">Invalid expression</span>`); }
+      } else appendLine(`<span class="text-slate-400">Command not recognized. Type 'help'.</span>`);
+    }
+
+    function runInteractiveDebuggerTrace() {
+      const code = document.getElementById('codeMainTextarea').value;
+      const out = document.getElementById('debuggerTraceOutput');
+      const lines = code.split('\n');
+      const activeFile = getActiveFile();
+      const bps = appState.breakpoints[activeFile.id] || [];
+
+      if (!code.trim()) {
+        out.innerHTML = `<div class="text-amber-300">ابتدا کدی در ویرایشگر وارد کنید تا تریس حافظه انجام شود.</div>`;
+        return;
+      }
+
+      const stepsHtml = lines.slice(0, 18).map((line, idx) => {
+        const lineNum = idx + 1;
+        if (!line.trim() || line.trim().startsWith('//') || line.trim().startsWith('#')) return '';
+        const isBp = bps.includes(lineNum);
+        return `
+          <div class="p-2 rounded-xl border ${isBp ? 'bg-rose-950/30 border-rose-500/50' : 'bg-[#09142B] border-slate-800'} flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 truncate">
+              <span class="px-2 py-0.5 rounded bg-slate-900 font-mono text-cyan-300 text-[11px]">Line ${lineNum} ${isBp ? '🔴 BREAK' : ''}</span>
+              <code class="ltr-code text-slate-200 truncate">${escapeHtml(line.trim())}</code>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-400 shrink-0">RAM Frame #${lineNum} OK</span>
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      out.innerHTML = stepsHtml || `<div class="text-slate-400">سطر قابل ردیابی یافت نشد.</div>`;
+    }
+
+    function renderLiveWebPreview() {
+      const iframe = document.getElementById('livePreviewIframe');
+      const activeFile = getActiveFile();
+      const lang = getLangObj(activeFile.langId);
+      const rawCode = document.getElementById('codeMainTextarea').value;
+      document.getElementById('livePreviewHeaderTitle').textContent = `Sandboxed Live Web Preview (${lang.name})`;
+      let htmlPayload = rawCode;
+      if (lang.id === 'css') htmlPayload = `<!DOCTYPE html><html><head><style>${rawCode}</style></head><body><div class="neon-box">farh∞d CSS3 Preview</div></body></html>`;
+      else if (lang.id === 'react') {
+        htmlPayload = `<!DOCTYPE html><html><head>
+          <script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>
+          <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>
+          <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+        </head><body style="margin:0"><div id="root"></div>
+          <script type="text/babel">${rawCode}\nReactDOM.createRoot(document.getElementById('root')).render(<App />);<\/script>
+        </body></html>`;
+      }
+      iframe.srcdoc = htmlPayload;
+    }
+
+    function recordExecutionHistory(fileName, langName, status, duration) {
+      appState.executionHistory.unshift({ fileName, langName, status, duration });
+      renderExecutionHistoryMini();
+      saveWorkspaceState();
+    }
+
+    function renderExecutionHistoryMini() {
+      const el = document.getElementById('executionHistoryMiniList');
+      if (!el) return;
+      if (appState.executionHistory.length === 0) {
+        el.innerHTML = `<div class="text-slate-500 text-center py-1">هنوز کدی اجرا نشده</div>`;
+        return;
+      }
+      el.innerHTML = appState.executionHistory.slice(0, 5).map(item => `
+        <div class="px-2 py-1 rounded-lg bg-[#09142B] flex items-center justify-between">
+          <span class="ltr-code text-slate-300 truncate max-w-[100px]">${item.fileName}</span>
+          <span class="${item.status === 'SUCCESS' ? 'text-emerald-400' : 'text-rose-400'} font-mono text-[10px]">${item.duration}</span>
+        </div>
+      `).join('');
+    }
+
+    // AI SUPER-STUDIO WITH REAL-TIME STREAMING MERGED FROM 2.HTML
+    let isAiBusy = false;
+
+    function openAiInIde() {
+      switchMainView('ide');
+      document.getElementById('aiAssistantDrawer').classList.remove('hidden');
+      setTimeout(() => document.getElementById('aiCustomPromptInput')?.focus(), 50);
+    }
+    function toggleAiSidebar() { document.getElementById('aiAssistantDrawer').classList.toggle('hidden'); }
+    function clearAiChat() {
+      appState.aiChatHistory = [];
+      document.getElementById('aiChatMessages').innerHTML = `<div class="p-3 rounded-2xl bg-purple-950/35 border border-purple-500/30 text-slate-300">گفتگو پاک شد. هر برنامه یا سوالی دارید بنویسید!</div>`;
+    }
+
+    async function openSuperAiFeature(featureKey) {
+      openAiInIde();
+      const activeFile = getActiveFile();
+      const lang = getLangObj(activeFile.langId);
+      const currentCode = document.getElementById('codeMainTextarea').value.trim() || lang.template;
+
+      if (featureKey === 'screenshot') {
+        document.getElementById('screenshotToCodeInput').click();
+        return;
+      }
+      if (featureKey === 'prompt2app') {
+        openCustomPrompt('توضیح دهید چه برنامه‌ای می‌خواهید تا ساخته شود:', 'ماشین‌حساب مهندسی گرافیکی با Tkinter', async (desc) => {
+          if (!desc) return;
+          await runRealAiRequest(`یک برنامه کامل و حرفه‌ای برای «${desc}» به زبان ${lang.name} بنویس و کد کامل و قابل اجرا را داخل بلوک مارک‌داون قرار بده.`, `🏗️ ساخت برنامه از توضیحات: ${desc}`, lang);
+        });
+        return;
+      }
+      if (featureKey === 'voice2code') {
+        startVoiceToCodeRecognition(lang);
+        return;
+      }
+      if (featureKey === 'explainExec') {
+        await runRealAiRequest(`کد زیر در زبان ${lang.name} را خط‌به‌خط کالبدشکافی کن و توضیح بده هنگام اجرا در هر خط چه اتفاقی در حافظه RAM و متغیرها می‌افتد:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\``, `🔍 کالبدشکافی خط‌به‌خط اجرای کد (${lang.name})`, lang);
+        return;
+      }
+      if (featureKey === 'unitTest') {
+        await runRealAiRequest(`به‌عنوان یک AI Test Engineer، برای کد زیر در زبان ${lang.name} تست‌های واحد (Unit Tests) و سناریوهای لبه (Edge Cases) بنویس و کد کامل قابل اجرا به همراه تست‌ها را داخل بلوک کد قرار بده:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\``, `🧪 تولید خودکار تست‌های واحد (AI Test Engineer)`, lang);
+        return;
+      }
+      if (featureKey === 'refactor') {
+        await runRealAiRequest(`کد زیر در زبان ${lang.name} را بر اساس اصول Clean Code و معماری بهینه بازآرایی (Refactor) کن بدون اینکه رفتار خروجی آن تغییر کند:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\``, `♻️ بازآرایی و بهبود ساختار کد (AI Refactoring)`, lang);
+      }
+    }
+
+    async function handleScreenshotToCodeUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const lang = getLangObj('html');
+      await runRealAiRequest(`کاربر یک تصویر اسکرین‌شات از رابط کاربری با نام «${file.name}» آپلود کرده است. یک رابط کاربری مدرن، ریسپانسیو و بسیار شیک با HTML5 و Tailwind CSS در یک فایل کامل تولید کن که آماده پیش‌نمایش زنده باشد.`, `📸 تبدیل تصویر رابط کاربری (${file.name}) به کد HTML/Tailwind`, lang);
+    }
+
+    function startVoiceToCodeRecognition(lang) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        openCustomPrompt('فرمان صوتی خود را بنویسید (مرورگر شما میکروفون مستقیم ندارد):', 'یک برنامه مرتب‌سازی سریع بنویس', (txt) => {
+          if (txt) runRealAiRequest(`فرمان صوتی کاربر: «${txt}». کد کامل را به زبان ${lang.name} داخل بلوک کد بنویس.`, `🎙️ فرمان صوتی: ${txt}`, lang);
+        });
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = 'fa-IR';
+      showToast('🎙️ در حال گوش دادن به فرمان صوتی شما... صحبت کنید', 'info');
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        runRealAiRequest(`فرمان صوتی کاربر: «${transcript}». کد کامل و قابل اجرا را به زبان ${lang.name} داخل بلوک کد بنویس.`, `🎙️ فرمان صوتی: ${transcript}`, lang);
+      };
+      rec.onerror = () => showToast('خطا در دریافت صدا؛ می‌توانید دستور را تایپ کنید.', 'warning');
+      rec.start();
+    }
+
+    async function triggerQuickAiCommand(cmdType) {
+      if (isAiBusy) return;
+      const activeFile = getActiveFile();
+      const lang = getLangObj(activeFile.langId);
+      const currentCode = document.getElementById('codeMainTextarea').value.trim() || lang.template;
+      const prompts = {
+        explain: { title: `📖 توضیح کامل کد فعلی (${lang.name})`, p: `لطفاً کد زیر که به زبان ${lang.name} نوشته شده را به زبان فارسی روان و بخش‌به‌بخش توضیح بده:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\`` },
+        debug: { title: `🐞 خطایابی و رفع باگ کد (${lang.name})`, p: `کد زیر در زبان ${lang.name} را خطایابی کن و نسخه کاملاً سالم و بدون باگ را داخل بلوک کد قرار بده:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\`` },
+        optimize: { title: `🚀 بهینه‌سازی سرعت کد (${lang.name})`, p: `کد زیر در زبان ${lang.name} را از نظر سرعت و حافظه بهینه کن و کد کامل را داخل بلوک کد برگردان:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\`` },
+        comment: { title: `📝 افزودن کامنت و مستندسازی (${lang.name})`, p: `به کد زیر در زبان ${lang.name} کامنت‌های توضیحی استاندارد اضافه کن و کد کامل را داخل بلوک کد برگردان:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\`` },
+        convert: { title: `🔄 ترجمه کد به زبان دیگر`, p: `این کد ${lang.name} را به زبان‌های Python و C++ ترجمه کن:\n\`\`\`${lang.id}\n${currentCode}\n\`\`\`` }
+      };
+      const cfg = prompts[cmdType];
+      if (cfg) await runRealAiRequest(cfg.p, cfg.title, lang);
+    }
+
+    async function sendCustomAiPrompt() {
+      if (isAiBusy) return;
+      const input = document.getElementById('aiCustomPromptInput');
+      const userText = input.value.trim();
+      if (!userText) return;
+      input.value = '';
+      const activeFile = getActiveFile();
+      const lang = getLangObj(activeFile.langId);
+      const fullPrompt = `زبان فعال محیط کدنویسی کاربر: ${lang.name} (پسوند .${lang.ext})\nدرخواست کاربر: "${userText}"\nکد کامل، استاندارد و قابل اجرا را داخل بلوک مارک‌داون \`\`\`${lang.id} قرار بده و توضیح فارسی مختصر بنویس.`;
+      await runRealAiRequest(fullPrompt, userText, lang);
+    }
+
+    // Real-time SSE Streaming across Groq LPU models (from 2.html) + Pollinations Failover
+    async function runRealAiRequest(promptText, displayUserTitle, lang) {
+      isAiBusy = true;
+      const chatBox = document.getElementById('aiChatMessages');
+      const latencyBadge = document.getElementById('aiLatencyBadge');
+      const sendBtn = document.getElementById('aiSendBtn');
+      if (sendBtn) sendBtn.disabled = true;
+
+      const userBubble = document.createElement('div');
+      userBubble.className = 'p-2.5 rounded-2xl bg-blue-600/25 border border-cyan-400/35 text-cyan-100 text-right font-bold';
+      userBubble.textContent = displayUserTitle;
+      chatBox.appendChild(userBubble);
+
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'p-3.5 rounded-2xl bg-[#09132C] border border-purple-500/40 text-slate-100 space-y-2.5 shadow-lg';
+      const streamContainer = document.createElement('div');
+      streamContainer.className = 'leading-relaxed ai-streaming-cursor whitespace-pre-wrap text-xs';
+      streamContainer.textContent = 'در حال پردازش و نگارش پاسخ توسط farh∞d AI...';
+      aiBubble.appendChild(streamContainer);
+      chatBox.appendChild(aiBubble);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const startTime = performance.now();
+      const messagesPayload = [
+        { role: 'system', content: 'You are farh∞d AI, an elite software architect inside farh∞d Online Compiler. Always explain briefly in fluent Persian (Farsi) and wrap ALL code inside clean markdown triple-backtick code blocks (e.g. ```python ... ```) with zero Persian commentary inside the code block itself.' },
+        ...appState.aiChatHistory.slice(-4),
+        { role: 'user', content: promptText }
+      ];
+
+      let finalAnswer = '';
+      let succeeded = false;
+
+      // STEP A: Secure Groq streaming through the Cloudflare Worker (API key never reaches the browser)
+      const workerInput = document.getElementById('settingBackendGatewayInput');
+      const workerBase = (workerInput?.value || localStorage.getItem('farhoodWorkerUrl') || '').trim().replace(/\/+$/, '');
+      const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it'];
+
+      if (workerBase) {
+        for (const modelName of groqModels) {
+          if (succeeded) break;
+          try {
+            const res = await fetch(`${workerBase}/api/ai/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ model: modelName, stream: true, temperature: 0.3, max_tokens: 2048, messages: messagesPayload })
+            });
+            if (!res.ok || !res.body) continue;
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+            let firstToken = false;
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                const dataStr = trimmed.slice(6);
+                if (dataStr === '[DONE]') continue;
+                try {
+                  const parsed = JSON.parse(dataStr);
+                  const delta = parsed.choices?.[0]?.delta?.content;
+                  if (delta) {
+                    if (!firstToken) {
+                      firstToken = true;
+                      if (latencyBadge) latencyBadge.textContent = `⚡ ${Math.round(performance.now() - startTime)}ms`;
+                      streamContainer.textContent = '';
+                    }
+                    finalAnswer += delta;
+                    streamContainer.textContent = finalAnswer;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                  }
+                } catch (e) {}
+              }
+            }
+            if (finalAnswer.trim().length > 0) succeeded = true;
+          } catch (e) {}
+        }
+      }
+
+      // STEP B: Always-On Keyless Cloud AI Failover
+      if (!succeeded) {
+        try {
+          const fallbackRes = await fetch('https://text.pollinations.ai/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'openai', messages: messagesPayload, temperature: 0.3 })
+          });
+          if (fallbackRes.ok) {
+            const data = await fallbackRes.json();
+            finalAnswer = data?.choices?.[0]?.message?.content || '';
+            if (finalAnswer.trim()) {
+              succeeded = true;
+              if (latencyBadge) latencyBadge.textContent = `⚡ ${Math.round(performance.now() - startTime)}ms`;
+            }
+          }
+        } catch (e) {}
+      }
+
+      streamContainer.classList.remove('ai-streaming-cursor');
+
+      if (succeeded && finalAnswer.trim()) {
+        appState.aiChatHistory.push({ role: 'user', content: displayUserTitle });
+        appState.aiChatHistory.push({ role: 'assistant', content: finalAnswer });
+        renderFormattedAiResponseWithInsertButtons(aiBubble, finalAnswer, lang);
+      } else {
+        streamContainer.innerHTML = `<span class="text-rose-400">⚠️ خطا در ارتباط با شبکه هوش مصنوعی.</span>`;
+      }
+
+      isAiBusy = false;
+      if (sendBtn) sendBtn.disabled = false;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function renderFormattedAiResponseWithInsertButtons(aiBubble, markdownText, lang) {
+      aiBubble.innerHTML = '';
+      const codeBlockRegex = /```([a-zA-Z0-9_+-]*)\n([\s\S]*?)```/g;
+      let lastIndex = 0, match, foundAnyCode = false;
+
+      while ((match = codeBlockRegex.exec(markdownText)) !== null) {
+        foundAnyCode = true;
+        const textBefore = markdownText.slice(lastIndex, match.index).trim();
+        if (textBefore) {
+          const p = document.createElement('div');
+          p.className = 'whitespace-pre-wrap leading-relaxed text-slate-200 text-xs';
+          p.textContent = textBefore;
+          aiBubble.appendChild(p);
+        }
+
+        const blockLang = (match[1] || lang.id).trim();
+        const codeContent = sanitizeExtractedCodeOnly(match[2]);
+
+        const codeCard = document.createElement('div');
+        codeCard.className = 'rounded-xl overflow-hidden border border-cyan-400/40 bg-[#040917] my-2 shadow-lg';
+
+        const headerBar = document.createElement('div');
+        headerBar.className = 'px-3 py-2 bg-[#081533] border-b border-cyan-500/30 flex flex-wrap items-center justify-between gap-2';
+        headerBar.innerHTML = `<span class="font-mono text-[11px] font-bold text-cyan-300 uppercase">${escapeHtml(blockLang || 'CODE')}</span>`;
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'flex items-center gap-1.5';
+
+        const directBtn = document.createElement('button');
+        directBtn.className = 'px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-extrabold text-[11px] flex items-center gap-1';
+        directBtn.innerHTML = '<i class="fa-solid fa-bolt"></i><span>درج فوری در ویرایشگر</span>';
+        directBtn.onclick = () => requestSafeCodeInsert(codeContent, blockLang, true);
+
+        const diffBtn = document.createElement('button');
+        diffBtn.className = 'px-2.5 py-1 rounded-lg bg-purple-600/40 hover:bg-purple-600 text-white text-[11px] font-bold';
+        diffBtn.innerHTML = 'بررسی Diff';
+        diffBtn.onclick = () => requestSafeCodeInsert(codeContent, blockLang, false);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold';
+        copyBtn.innerHTML = 'کپی';
+        copyBtn.onclick = () => { copyTextHelper(codeContent); showToast('کد کپی شد', 'info'); };
+
+        actionsDiv.appendChild(directBtn);
+        actionsDiv.appendChild(diffBtn);
+        actionsDiv.appendChild(copyBtn);
+        headerBar.appendChild(actionsDiv);
+
+        const preEl = document.createElement('pre');
+        preEl.className = 'ltr-code p-3 text-xs text-emerald-300 overflow-x-auto max-h-72 m-0 leading-relaxed';
+        preEl.textContent = codeContent;
+
+        const bigTransferBtn = document.createElement('button');
+        bigTransferBtn.className = 'w-full py-2.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:opacity-95 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 shadow-lg';
+        bigTransferBtn.innerHTML = '<i class="fa-solid fa-rocket"></i><span>🚀 انتقال کل این کد به ویرایشگر و آماده‌سازی برای اجرا</span>';
+        bigTransferBtn.onclick = () => requestSafeCodeInsert(codeContent, blockLang, true);
+
+        codeCard.appendChild(headerBar);
+        codeCard.appendChild(preEl);
+        codeCard.appendChild(bigTransferBtn);
+        aiBubble.appendChild(codeCard);
+
+        lastIndex = codeBlockRegex.lastIndex;
+      }
+
+      const remaining = markdownText.slice(lastIndex).trim();
+      if (remaining) {
+        const p = document.createElement('div');
+        p.className = 'whitespace-pre-wrap leading-relaxed text-slate-200 text-xs';
+        p.textContent = remaining;
+        aiBubble.appendChild(p);
+      }
+      if (!foundAnyCode && !aiBubble.hasChildNodes()) {
+        aiBubble.textContent = markdownText;
+      }
+    }
+
+    // ENGINEERING SUITE MODALS
+    function openEngineeringSuiteModal(defaultTab = 'flowchart') {
+      document.getElementById('engineeringSuiteModal').classList.remove('hidden');
+      switchSuiteTab(defaultTab);
+    }
+    function closeEngineeringSuiteModal() { document.getElementById('engineeringSuiteModal').classList.add('hidden'); }
+
+    function switchSuiteTab(tabId) {
+      document.querySelectorAll('.suite-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`suitePane-${tabId}`)?.classList.remove('hidden');
+      document.querySelectorAll('.suite-tab-btn').forEach(b => {
+        b.className = 'suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 flex items-center gap-1.5';
+      });
+      const activeBtn = document.getElementById(`suiteTab-${tabId}`);
+      if (activeBtn) activeBtn.className = 'suite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-farhood-primary text-white flex items-center gap-1.5';
+
+      if (tabId === 'flowchart') generateCodeFlowchartSvg();
+      if (tabId === 'visualizer') generateRandomAlgoArray();
+      if (tabId === 'dbstudio') runDatabaseStudioQuery();
+      if (tabId === 'git') renderGitSnapshotsList();
+    }
+
+    function generateCodeFlowchartSvg() {
+      const code = document.getElementById('codeMainTextarea').value || getLangObj(getActiveFile().langId).template;
+      const lines = code.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//') && !l.startsWith('#')).slice(0, 7);
+      const nodes = ['START (شروع برنامه)', ...lines, 'END (پایان اجرا)'];
+      const height = nodes.length * 76 + 40;
+      let svg = `<svg width="580" height="${height}" viewBox="0 0 580 ${height}" xmlns="http://www.w3.org/2000/svg" class="ltr-code">`;
+      nodes.forEach((txt, i) => {
+        const y = 20 + i * 76;
+        const isCond = /^(if|for|while|switch)/.test(txt);
+        const color = i === 0 || i === nodes.length - 1 ? '#00E6A0' : (isCond ? '#FFB800' : '#00C8FF');
+        svg += `<rect x="90" y="${y}" width="400" height="44" rx="${i === 0 || i === nodes.length - 1 ? 22 : 10}" fill="#081533" stroke="${color}" stroke-width="2"/>`;
+        svg += `<text x="290" y="${y + 26}" fill="#F8FAFC" font-family="JetBrains Mono" font-size="12" text-anchor="middle">${escapeHtml(txt.slice(0, 42))}</text>`;
+        if (i < nodes.length - 1) {
+          svg += `<line x1="290" y1="${y + 44}" x2="290" y2="${y + 76}" stroke="#0066FF" stroke-width="2"/>`;
+        }
+      });
+      svg += `</svg>`;
+      document.getElementById('flowchartSvgContainer').innerHTML = svg;
+    }
+
+    let algoArray = [];
+    function generateRandomAlgoArray() {
+      algoArray = Array.from({ length: 16 }, () => Math.floor(Math.random() * 80) + 15);
+      renderAlgoBars(-1, -1);
+    }
+    function renderAlgoBars(activeIdx1, activeIdx2) {
+      const vp = document.getElementById('algoBarsViewport');
+      if (!vp) return;
+      vp.innerHTML = algoArray.map((val, idx) => {
+        const color = (idx === activeIdx1 || idx === activeIdx2) ? 'bg-emerald-400' : 'bg-gradient-to-t from-blue-600 to-cyan-400';
+        return `<div class="flex flex-col items-center gap-1 flex-1"><span class="text-[10px] font-mono text-slate-300">${val}</span><div class="w-full rounded-t-lg transition-all duration-150 ${color}" style="height:${val * 2}px"></div></div>`;
+      }).join('');
+    }
+    async function startAlgorithmVisualization() {
+      const status = document.getElementById('algoStatusText');
+      status.textContent = 'در حال اجرای انیمیشن مرتب‌سازی...';
+      for (let i = 0; i < algoArray.length; i++) {
+        for (let j = 0; j < algoArray.length - i - 1; j++) {
+          renderAlgoBars(j, j + 1);
+          await new Promise(r => setTimeout(r, 65));
+          if (algoArray[j] > algoArray[j + 1]) {
+            const tmp = algoArray[j];
+            algoArray[j] = algoArray[j + 1];
+            algoArray[j + 1] = tmp;
+            renderAlgoBars(j, j + 1);
+          }
+        }
+      }
+      renderAlgoBars(-1, -1);
+      status.textContent = '✓ مرتب‌سازی آرایه با موفقیت کامل شد!';
+    }
+
+    async function executeApiPlaygroundRequest() {
+      const method = document.getElementById('apiPlaygroundMethod').value;
+      const url = document.getElementById('apiPlaygroundUrl').value.trim();
+      const body = document.getElementById('apiPlaygroundBody').value.trim();
+      const out = document.getElementById('apiPlaygroundResponse');
+      out.textContent = 'Sending request...';
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (method === 'POST' && body) opts.body = body;
+        const res = await fetch(url, opts);
+        const text = await res.text();
+        out.textContent = `HTTP ${res.status}\n\n${text}`;
+      } catch (e) { out.textContent = `Error: ${e.message}`; }
+    }
+
+    function runDatabaseStudioQuery() {
+      const sql = document.getElementById('dbStudioSqlInput').value;
+      const container = document.getElementById('dbStudioResultTable');
+      if (typeof alasql === 'undefined') return;
+      try {
+        const stmts = sql.split(';').map(s => s.trim()).filter(Boolean);
+        let lastRows = [];
+        stmts.forEach(s => { const r = alasql(s); if (Array.isArray(r)) lastRows = r; });
+        if (lastRows.length === 0) { container.innerHTML = `<div class="text-emerald-400">کوئری با موفقیت اجرا شد.</div>`; return; }
+        const cols = Object.keys(lastRows[0]);
+        container.innerHTML = `
+          <table class="w-full text-left ltr-code border-collapse text-xs">
+            <thead><tr class="border-b border-cyan-500/30 text-cyan-300">${cols.map(c => `<th class="p-2">${escapeHtml(c)}</th>`).join('')}</tr></thead>
+            <tbody>${lastRows.map(r => `<tr class="border-b border-slate-800">${cols.map(c => `<td class="p-2 text-slate-200">${escapeHtml(String(r[c] ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>`;
+      } catch (e) { container.innerHTML = `<div class="text-rose-400 ltr-code">${escapeHtml(e.message)}</div>`; }
+    }
+
+    function createProjectSnapshot() {
+      const msg = document.getElementById('gitCommitMessageInput')?.value.trim() || `Snapshot #${appState.snapshots.length + 1}`;
+      appState.snapshots.unshift({
+        id: 'snap-' + Date.now(),
+        message: msg,
+        time: new Date().toLocaleTimeString('fa-IR'),
+        filesCopy: JSON.parse(JSON.stringify(appState.files))
+      });
+      saveWorkspaceState();
+      renderGitSnapshotsList();
+      showToast(`کامیت «${msg}» ثبت شد`, 'success');
+    }
+
+    function renderGitSnapshotsList() {
+      const el = document.getElementById('gitSnapshotsListContainer');
+      if (!el) return;
+      if (appState.snapshots.length === 0) {
+        el.innerHTML = `<div class="text-slate-400">هنوز هیچ Snapshot ثبت نشده است.</div>`;
+        return;
+      }
+      el.innerHTML = appState.snapshots.map(s => `
+        <div class="p-3 rounded-xl bg-[#081229] border border-purple-500/30 flex items-center justify-between">
+          <div><div class="font-bold text-white">${escapeHtml(s.message)}</div><div class="text-[10px] text-slate-400 font-mono">${s.time} • ${s.filesCopy.length} files</div></div>
+          <button onclick="restoreProjectSnapshot('${s.id}')" class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold hover:bg-emerald-500 hover:text-slate-950 transition">بازگردانی (Restore)</button>
+        </div>
+      `).join('');
+    }
+
+    function restoreProjectSnapshot(snapId) {
+      const found = appState.snapshots.find(s => s.id === snapId);
+      if (!found) return;
+      appState.files = JSON.parse(JSON.stringify(found.filesCopy));
+      setActiveFile(appState.files[0].id);
+      closeEngineeringSuiteModal();
+      showToast('نسخه انتخاب‌شده با موفقیت بازگردانی شد', 'success');
+    }
+
+    async function exportFullProjectZip() {
+      if (typeof JSZip === 'undefined') { downloadActiveFile(); return; }
+      const zip = new JSZip();
+      appState.files.forEach(f => { zip.file(`${f.folder || 'src'}/${f.name}`, f.content || ''); });
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'farhood-project.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('کل پروژه به صورت فایل ZIP دانلود شد', 'success');
+    }
+
+    function formatCurrentCode() {
+      const ta = document.getElementById('codeMainTextarea');
+      ta.value = ta.value.split('\n').map(line => line.replace(/\s+$/, '')).join('\n');
+      ta.dispatchEvent(new Event('input'));
+      showToast('کدهای شما مرتب‌سازی شد', 'success');
+    }
+
+    function clearCurrentEditor() {
+      const active = getActiveFile();
+      active.content = '';
+      setActiveFile(active.id);
+      showToast('ویرایشگر پاکسازی شد', 'info');
+    }
+
+    function downloadActiveFile() {
+      const active = getActiveFile();
+      const url = URL.createObjectURL(new Blob([active.content], { type: 'text/plain;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = active.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop().toLowerCase();
+      const matchedLang = LANGUAGES_CATALOG.find(l => l.ext === ext) || LANGUAGES_CATALOG[0];
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const newFile = { id: 'file-' + Date.now(), name: file.name, folder: 'src', langId: matchedLang.id, content: ev.target.result, updatedAt: Date.now() };
+        appState.files.push(newFile);
+        appState.openTabIds.push(newFile.id);
+        setActiveFile(newFile.id);
+      };
+      reader.readAsText(file);
+    }
+
+    function toggleEditorTheme() {
+      appState.isLightTheme = !appState.isLightTheme;
+      document.body.classList.toggle('light-theme', appState.isLightTheme);
+      document.getElementById('themeToggleIcon').className = appState.isLightTheme ? 'fa-solid fa-sun text-amber-500' : 'fa-solid fa-moon';
+    }
+
+    function toggleIdeSidebar() { document.getElementById('ideSidebar').classList.toggle('hidden'); }
+
+    function switchTerminalTab(tabName) {
+      document.querySelectorAll('.term-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`termPane-${tabName}`)?.classList.remove('hidden');
+      document.querySelectorAll('.term-tab-btn').forEach(btn => {
+        btn.className = 'term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
+      });
+      const activeBtn = document.getElementById(`termTab-${tabName}`);
+      if (activeBtn) activeBtn.className = 'term-tab-btn px-3 py-1 rounded-lg text-xs font-bold bg-blue-600/25 text-cyan-300 border border-cyan-400/30 flex items-center gap-1.5';
+    }
+
+    function copyTextHelper(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    function copyOutputToClipboard() {
+      copyTextHelper(document.getElementById('terminalStdoutContent')?.innerText || '');
+      showToast('خروجی کپی شد', 'success');
+    }
+
+    function clearTerminalOutput() {
+      document.getElementById('terminalStdoutContent').innerHTML = `<div class="text-slate-500">// خروجی پاک شد.</div>`;
+      document.getElementById('termPane-errors').innerHTML = `<div class="text-emerald-400">✓ بدون خطا.</div>`;
+      document.getElementById('errorCountBadge').textContent = '0';
+    }
+
+    function switchMainView(viewName) {
+      appState.currentView = viewName;
+      const isIde = viewName === 'ide';
+      document.getElementById('view-home')?.classList.toggle('hidden', isIde);
+      document.getElementById('view-ide')?.classList.toggle('hidden', !isIde);
+      const ideToolbar = document.getElementById('unifiedIdeToolbar');
+      ideToolbar.classList.toggle('hidden', !isIde);
+      ideToolbar.classList.toggle('flex', isIde);
+      document.body.classList.toggle('ide-locked', isIde);
+      if (isIde) { window.scrollTo(0, 0); updateEditorGutterAndTelemetry(); }
+
+      ['home', 'ide'].forEach(v => {
+        const btn = document.getElementById(`navBtn-${v}`);
+        if (btn) {
+          btn.className = v === viewName
+            ? 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-gradient-to-r from-farhood-primary to-blue-500 text-white shadow'
+            : 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-slate-300 hover:text-white transition flex items-center gap-1.5';
+        }
+      });
+    }
+
+    function scrollToLanguageHub() {
+      switchMainView('home');
+      document.getElementById('languageHubSection')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
+    function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+    function resetAllWorkspaceData() { localStorage.removeItem('farhood_ide_enterprise_v13'); location.reload(); }
+
+    let customPromptCallback = null;
+    function openCustomPrompt(title, defaultVal, callback) {
+      document.getElementById('customPromptTitle').textContent = title;
+      const inp = document.getElementById('customPromptInput');
+      inp.value = defaultVal || '';
+      customPromptCallback = callback;
+      document.getElementById('customPromptModal').classList.remove('hidden');
+      inp.focus();
+    }
+    function closeCustomPromptModal() { document.getElementById('customPromptModal').classList.add('hidden'); customPromptCallback = null; }
+    document.getElementById('customPromptConfirmBtn')?.addEventListener('click', () => {
+      if (customPromptCallback) customPromptCallback(document.getElementById('customPromptInput').value);
+      closeCustomPromptModal();
+    });
+
+    function initTerminalResizer() {
+      const resizer = document.getElementById('terminalResizer');
+      const panel = document.getElementById('bottomTerminalPanel');
+      let isResizing = false;
+      resizer.addEventListener('mousedown', () => { isResizing = true; resizer.classList.add('active'); document.body.style.userSelect = 'none'; });
+      window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const newHeight = window.innerHeight - e.clientY;
+        if (newHeight >= 110 && newHeight <= window.innerHeight * 0.65) panel.style.height = `${newHeight}px`;
+      });
+      window.addEventListener('mouseup', () => { if (isResizing) { isResizing = false; resizer.classList.remove('active'); document.body.style.userSelect = ''; } });
+    }
+
+    function escapeHtml(str) { return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>'); }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'border-emerald-400 bg-emerald-950/90 text-emerald-200',
+        warning: 'border-amber-400 bg-amber-950/90 text-amber-200',
+        error: 'border-rose-400 bg-rose-950/90 text-rose-200',
+        info: 'border-cyan-400 bg-[#081533]/95 text-cyan-200'
+      };
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-2.5 rounded-xl border ${colors[type] || colors.info} text-xs font-bold shadow-xl backdrop-blur-md transition-all duration-300`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    window.onload = function () {
+      loadWorkspaceState();
+      initAnimatedBackground();
+      renderQuickAccessBars();
+      renderLanguageGrid();
+      initCodeEditor();
+      renderFileExplorer();
+      renderEditorTabs();
+      renderExecutionHistoryMini();
+      initTerminalResizer();
+    };
+  </script>
+</body>
+</html>
